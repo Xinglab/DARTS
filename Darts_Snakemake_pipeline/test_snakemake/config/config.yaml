@@ -1,0 +1,21 @@
+genome_index:
+    hg19:
+        star_idx: /u/nobackup/yxing/NOBACKUP/frankwoe/hg19/star_idx_gencode_v19
+        kallisto_idx: /u/nobackup/yxing/NOBACKUP/frankwoe/hg19/kallisto_pctx_idx_gencodeV19/hg19_pc_tx_kal.idx
+        gtf: /u/nobackup/yxing/NOBACKUP/frankwoe/hg19/gencode.v19.annotation.gtf
+    mm10:
+        star_idx: /u/nobackup/yxing/NOBACKUP/frankwoe/mm10/star_idx_gencodeM13
+        gtf: /u/nobackup/yxing/NOBACKUP/frankwoe/mm10/gencode.vM13.annotation.gtf
+
+sample_dict:
+    s1: ['s1_1', 's1_2']
+    s2: ['s2_1', 's2_2']
+
+rmats:
+    readLength: 101
+    comparison:
+        s1-s2:
+            group1:
+                ["s1"]
+            group2:
+                ["s2"]

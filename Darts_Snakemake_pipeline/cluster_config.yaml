@@ -1,0 +1,19 @@
+__default__:
+    h_data: 4G
+    h_rt: 6:00:0
+
+dump_sra:
+    h_data: 8G
+    h_rt: 8:00:0
+
+star_map:
+    h_data: 36G
+    h_rt: 4:00:0
+
+kallisto_quant:
+    h_data: 8G
+    h_rt: 4:00:0
+
+cleanup_fq:
+    h_data: 1G
+    h_rt: 0:10:0

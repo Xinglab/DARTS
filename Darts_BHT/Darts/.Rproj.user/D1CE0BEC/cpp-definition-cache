@@ -1,0 +1,62 @@
+[
+    {
+        "definitions" : [
+            {
+                "column" : 8,
+                "file" : "C:/Users/Zijun/Dropbox/DARTS/src/Darts_R_package/Darts/src/sampler.cpp",
+                "kind" : 6,
+                "line" : 15,
+                "name" : "dnorm_cpp(double, double, double)",
+                "parent_name" : "",
+                "usr" : "c:@F@dnorm_cpp#d#d#d#"
+            },
+            {
+                "column" : 8,
+                "file" : "C:/Users/Zijun/Dropbox/DARTS/src/Darts_R_package/Darts/src/sampler.cpp",
+                "kind" : 6,
+                "line" : 21,
+                "name" : "rdarts_post_pr_cpp(NumericVector, NumericMatrix, double, double, bool, double, double)",
+                "parent_name" : "",
+                "usr" : "c:@F@rdarts_post_pr_cpp#$@N@Rcpp@C@Vector>#VI14#@N@Rcpp@CT>1#T@PreserveStorage#$@N@Rcpp@C@Matrix>#VI14#@N@Rcpp@CT>1#T@PreserveStorage#d#d#b#d#d#"
+            },
+            {
+                "column" : 15,
+                "file" : "C:/Users/Zijun/Dropbox/DARTS/src/Darts_R_package/Darts/src/sampler.cpp",
+                "kind" : 6,
+                "line" : 81,
+                "name" : "rdarts_posterior_MCMC_sampler(int, double, double, NumericMatrix, NumericVector, double, int, int, int, bool, double, double)",
+                "parent_name" : "",
+                "usr" : "c:@F@rdarts_posterior_MCMC_sampler#I#d#d#$@N@Rcpp@C@Matrix>#VI14#@N@Rcpp@CT>1#T@PreserveStorage#$@N@Rcpp@C@Vector>#VI14#@N@Rcpp@CT>1#T@PreserveStorage#d#I#I#I#b#d#d#"
+            },
+            {
+                "column" : 8,
+                "file" : "C:/Users/Zijun/Dropbox/DARTS/src/Darts_R_package/Darts/src/sampler.cpp",
+                "kind" : 6,
+                "line" : 124,
+                "name" : "darts_likelihood_cpp(double, double, List, bool, double, double)",
+                "parent_name" : "",
+                "usr" : "c:@F@darts_likelihood_cpp#d#d#$@N@Rcpp@C@Vector>#VI19#@N@Rcpp@CT>1#T@PreserveStorage#b#d#d#"
+            },
+            {
+                "column" : 6,
+                "file" : "C:/Users/Zijun/Dropbox/DARTS/src/Darts_R_package/Darts/src/sampler.cpp",
+                "kind" : 6,
+                "line" : 178,
+                "name" : "set_seed(unsigned int)",
+                "parent_name" : "",
+                "usr" : "c:@F@set_seed#i#"
+            },
+            {
+                "column" : 15,
+                "file" : "C:/Users/Zijun/Dropbox/DARTS/src/Darts_R_package/Darts/src/sampler.cpp",
+                "kind" : 6,
+                "line" : 185,
+                "name" : "darts_posterior_MCMC_sampler(int, double, List, NumericVector, double, int, int, int, double, double)",
+                "parent_name" : "",
+                "usr" : "c:@F@darts_posterior_MCMC_sampler#I#d#$@N@Rcpp@C@Vector>#VI19#@N@Rcpp@CT>1#T@PreserveStorage#$@N@Rcpp@C@Vector>#VI14#@N@Rcpp@CT>1#T@PreserveStorage#d#I#I#I#d#d#"
+            }
+        ],
+        "file" : "C:/Users/Zijun/Dropbox/DARTS/src/Darts_R_package/Darts/src/sampler.cpp",
+        "file_last_write" : 1500066338
+    }
+]

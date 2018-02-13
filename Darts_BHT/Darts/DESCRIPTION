@@ -1,0 +1,12 @@
+Package: Darts
+Type: Package
+Title: Deep learning Analysis of Rna-seq Transcript Splicing
+Version: 0.1.1
+Date: 2017-12-10
+Author: Zijun Zhang
+Maintainer: Zijun Zhang <zj.z@ucla.edu>
+Description: Bayesian statistical framework for integrating deep 
+	learning and differential splicing inference.
+License: GPL (>= 2)
+Imports: Rcpp
+LinkingTo: Rcpp
