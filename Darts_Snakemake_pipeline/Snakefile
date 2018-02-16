@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 
-"""A pipeline for processing GEO data
+"""A pipeline for processing GEO/fastq data using 
+Darts splicing analysis toolkit
+Author:
+	Zijun Zhang
+Date:
+	2.12.2018
 """
 
 import os
