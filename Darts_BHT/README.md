@@ -1,6 +1,6 @@
 # Readme for Darts BHT
 ### Author: "Zijun Zhang"
-### Date: "2.15.2018"
+### Date: "3.17.2018"
 
 ### Table of Contents
 1. [Installation](#installation)
