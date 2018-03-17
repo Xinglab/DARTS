@@ -26,7 +26,7 @@ To test whether you have successfully installed `Darts_DNN`, type the following 
 > Darts_DNN -h
 usage: Darts_DNN [-h] [--version] {train,predict,build_feature} ...
 
-Darts_DNN -- DARTS - Deep-learning Augmented RNA-seq analyis of Transcript
+Darts_DNN -- DARTS - Deep-learning Augmented RNA-seq analysis of Transcript
 Splicing
 
 positional arguments:

@@ -11,14 +11,37 @@
 To install `Darts_BHT` R package, simply browse to the BHT folder and
 type the following command in terminal:
 ```
-R CMD INSTALL Darts_0.1.1.tar.gz
+make install
 ```
 This will compile a few Rcpp files and prepare for loading. 
-If finished sucessfully, you will see the following message
+If finished successfully, you will see the following message
 ```
 ** building package indices
 ** testing if installed package can be loaded
 * DONE (Darts)
+```
+
+You should also add `Darts` suite to your environment variables, by
+adding the following line to your `.bash_profile` in `$HOME` directory:
+```
+export PATH=$HOME/.darts:$PATH
+```
+
+Now in your shell,  type
+```
+> source ~/.bash_profile
+> Darts_BHT -h
+Usage: Darts_BHT [-[-input|i] <character>] [-[-rho|r] [<character>]] [-[-out|o] <character>] [-[-cutoff|c] [<double>]] [-[-rep|k] [<integer>]] [-[-pool|m] [<logical>]] [-[-estim_gVar|g] [<logical>]] [-[-verbose|v] [<integer>]] [-[-help|h]]
+    -i|--input         input file in Spider format (required)
+    -r|--rho           prior file in Spider format (optional, if none then flat prior i.e. rho=0.5)
+    -o|--out           output directory (required)
+    -c|--cutoff        Cutoff of Posterior probability, must be in (0,1) (optional, default=0.05)
+    -k|--rep           run replicate [pair/unpair] model (optional, 0:no replicate, 1:unpaired, 2:paired, default=0)
+    -m|--pool          merge the replicates, valid only when rep>0, default: FALSE
+    -g|--estim_gVar    Use prior to estimate within group variance, default: FALSE
+    -v|--verbose       verbose mode (optional, 0:non-verbose, 1:summary, 2:every 200, default=0)
+    -h|--help          print this help message and exit
+
 ```
 
 ### Testing

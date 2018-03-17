@@ -86,7 +86,7 @@ def get_arg_parser():
 	Args
 	Returns
 	"""
-	description = "%(prog)s -- DARTS - Deep-learning Augmented RNA-seq analyis of Transcript Splicing"
+	description = "%(prog)s -- DARTS - Deep-learning Augmented RNA-seq analysis of Transcript Splicing"
 	epilog = "For command line options of each sub-command, type: %(prog)s COMMAND -h"
 	
 	argparser = ap.ArgumentParser(description=description, epilog=epilog)
