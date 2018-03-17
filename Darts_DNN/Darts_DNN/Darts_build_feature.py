@@ -110,6 +110,8 @@ def make_single_table(darts_flat_fn, outdir, outfn):
 	Y = sp_out['label'][idx]
 	metadata = sp_out['metadata'][idx]
 	X = seqFeature.loc[[x for x in sp_out['evt'] if x in seqFeature.index]].as_matrix()	
+	if X.shape[0]==0:
+		raise Exception('no ID could be matched with cis- file; check your Darts-flat ID column or if you supplied the correct cis-feature file.')
 	X = np.hstack([X, [rbp_exp_vec]*X.shape[0]])
 	
 	#### save feature table in h5 ####

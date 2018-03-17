@@ -1,6 +1,6 @@
 # Readme for Darts_DNN
 ### Author: "Zijun Zhang"
-### Date: "2.15.2018"
+### Date: "3.17.2018"
 
 ### Table of Contents
 - [Installation](#installation)
@@ -8,10 +8,15 @@
 - [Using Darts DNN](#using-darts-dnn)
 
 ### Installation
-The `Darts_DNN` does need installation; once you download/clone the repo into your
-local folder, you can directly call it for training and prediction. 
+To install `Darts_DNN` python package, navigate to this folder, then type
+```
+> cd Darts_DNN
+> make install
+```
 
-However, there are a few Deep-learning packages that `Darts_DNN` requires, including
+
+
+There are a few Deep-learning packages that `Darts_DNN` requires, including
 the popular interfaces [Keras](#), [Theano](#). 
 
 `Darts_DNN` was trained using an older version of `Keras`, and we are actively working on
