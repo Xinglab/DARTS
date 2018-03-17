@@ -1,5 +1,4 @@
 #!/usr/bin/env Rscript
-
 # the equivalent of SP_pipeline.py in R
 # because Rcpp seems to run faster in R compared to rpy2
 # Zijun Zhang

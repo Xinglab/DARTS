@@ -1,0 +1,160 @@
+#!/usr/bin/env python
+
+
+"""Deep-learning Augmented RNA-seq analysis of Transcript Splicing
+
+This is the main entry for Darts. 
+
+Example:
+	$ Darts_DNN [train|predict|build_feature] <options>
+
+Authors:
+	Zijun Zhang <zj.z[at]ucla.edu>
+	Yi Xing <yxing[at]ucla.edu>
+
+Date:
+	Feb. 16, 2018
+"""
+
+__author__ = 'Zijun Zhang'
+__version__ = '0.1.0'
+__email__ = 'zj.z@ucla.edu'
+
+
+import os
+import sys
+import logging
+import argparse as ap
+import datetime
+
+
+def main():
+	"""main entry for Darts
+	This function setup the logging and handle the input options
+	Args
+		None
+	Returns
+		None
+	"""
+	logger = setup_logger()
+	argparser = get_arg_parser()
+	args = argparser.parse_args()
+	
+	subcommand = args.subcommand
+	
+	if subcommand == 'train':
+		from Darts_DNN import Darts_train
+		Darts_train.parser( args )
+		
+	elif subcommand == 'predict':
+		from Darts_DNN import Darts_pred
+		Darts_pred.parser( args )
+	
+	elif subcommand == 'build_feature':
+		from Darts_DNN import Darts_build_feature
+		#print args
+		Darts_build_feature.parser( args )
+
+def setup_logger():
+	"""Set up the logger for the whole pipeline
+	Args
+		None
+	Returns
+		logger: logging object
+	"""
+	# setup logger
+	logger = logging.getLogger('Darts_DNN')
+	logger.setLevel(logging.DEBUG)
+	# create file handler which logs even debug messages
+	fh = logging.FileHandler('log.Darts_DNN.txt')
+	fh.setLevel(logging.INFO)
+	# create console handler with a higher log level
+	ch = logging.StreamHandler()
+	ch.setLevel(logging.DEBUG)
+	# create formatter and add it to the handlers
+	formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s -\n %(message)s')
+	fh.setFormatter(formatter)
+	ch.setFormatter(formatter)
+	# add the handlers to the logger
+	logger.addHandler(fh)
+	logger.addHandler(ch)
+	return logger
+
+
+def get_arg_parser():
+	"""DOCSTRING
+	Args
+	Returns
+	"""
+	description = "%(prog)s -- DARTS - Deep-learning Augmented RNA-seq analyis of Transcript Splicing"
+	epilog = "For command line options of each sub-command, type: %(prog)s COMMAND -h"
+	
+	argparser = ap.ArgumentParser(description=description, epilog=epilog)
+	argparser.add_argument("--version", action="version", version="%(prog)s "+__version__)
+	
+	subparsers = argparser.add_subparsers( dest="subcommand" )
+	
+	# train
+	add_train_parser(subparsers)
+	
+	# predict
+	add_pred_parser(subparsers)
+	
+	# build_feature
+	add_build_feature_parser(subparsers)
+	
+	return argparser
+
+
+def add_train_parser( subparsers ):
+	ag_train = subparsers.add_parser("train", help="Darts_DNN train: train a DNN model using Darts Framework from scratch")
+	
+	# input/output
+	ag_train.add_argument("-t", "--train-dir", dest="train_dir", nargs='+', type=str, required=True,
+		help="Folder path for all training data (in .h5 format), maximum from two folder; e.g. train_data/ENCODE train_data/Roadmap")
+	
+	ag_train.add_argument("-o", "--out-dir", dest="out_dir", type=str, required=True,
+		help="Output folder; saved model parameters will be 'best_val_model.h5'")	
+	return
+
+
+def add_pred_parser( subparsers ):
+	ag_pred = subparsers.add_parser("predict", help="Darts_DNN predict: make predictions on a built feature sets in h5 format")
+	
+	# input/output
+	ag_pred.add_argument("-i", "--input", dest="input", type=str, required=True,
+		help="Input feature file (*.h5)")
+	
+	ag_pred.add_argument("-o", "--output", dest="output", type=str, required=True,
+		help="Output filename")
+	ag_pred.add_argument("-m", "--model", dest="model", type=str, required=True,
+		help="Filepath for a model file; default using internal Darts_DNN trained on ENCODE+Roadmap")
+	return
+
+
+def add_build_feature_parser( subparsers ):
+	ag_build_feature = subparsers.add_parser("build_feature", help="Darts_DNN build_feature: build feature file given required information")
+	
+	# input/output
+	ag_build_feature.add_argument("-i", "--input", dest="input", type=str, required=True,
+		help="A list of exon-skipping events; Darts-flat output")
+	
+	ag_build_feature.add_argument("-c", "--cis-feature", dest="cis", type=str, required=True,
+		help="File path for exon cis features (Normalized); default using downloaded from Github")
+	
+	ag_build_feature.add_argument("-e", "--expression", dest="expr", nargs='+', type=str, required=True,
+		help="Folder path for Kallisto expression files; e.g '-e Ctrl_rep1,Ctrl_rep2 KD_rep1,KD_rep2'")
+	
+	ag_build_feature.add_argument("-o", "--output", dest="output", type=str, required=True,
+		help="Output file (*.h5)")
+	
+	return
+
+
+
+if __name__ == '__main__':
+	try:
+		main()
+	except KeyboardInterrupt:
+		sys.stderr.write("User interrupted; program terminated.")
+		sys.exit(0)
