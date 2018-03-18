@@ -20,7 +20,7 @@ from Darts_DNN import Darts_rbpTable as _Darts_rbp
 from Darts_DNN import Darts_kallisto2rsem as _Darts_kallisto2rsem
 
 
-def read_sequence_feature(fn="/u/nobackup/yxing/NOBACKUP/frankwoe/ENCODE/sequence_features/ENCODE_sequenceFeature_absmax_normalized.h5"):
+def read_sequence_feature(fn):
 	if not os.path.isfile(fn):
 		raise Exception('cis feature file not found: %s'%fn)
 	data=pd.read_hdf(fn)
@@ -82,7 +82,7 @@ def RBPexp_normalizer(rbp_exp_vec):
 	return rbp_exp_vec
 
 
-def make_single_table(darts_flat_fn, outdir, outfn):
+def make_single_table(darts_flat_fn, cis_feature_fn, outdir, outfn):
 	
 	#### read in darts-flat output ####
 	print(".. read darts-flat output")
@@ -99,7 +99,7 @@ def make_single_table(darts_flat_fn, outdir, outfn):
 	
 	#### read in sequence features ####
 	print(".. read sequence feature")
-	seqFeature = read_sequence_feature()
+	seqFeature = read_sequence_feature(cis_feature_fn)
 	colnames_2 = seqFeature.columns.values
 	seqFeature_len = seqFeature.shape[1]
 	colnames = np.concatenate([colnames_2, colnames])
