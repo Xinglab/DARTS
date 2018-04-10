@@ -153,7 +153,7 @@ def parser( args ):
 	
 	# make the h5 store
 	logger.info('make h5 feature table')
-	make_single_table(darts_flat_fn, outdir, outfn)
+	make_single_table(darts_flat_fn, cis, outdir, outfn)
 
 
 rbp_max_str = """RPS11	9045.929

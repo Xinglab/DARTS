@@ -1,7 +1,8 @@
 install:
-	R CMD INSTALL Darts_0.1.1.tar.gz
+	R CMD build Darts
+	R CMD INSTALL Darts_0.1.2.tar.gz
 	if [ ! -d $(HOME)/.darts ]; then mkdir $(HOME)/.darts/; fi
-	cp ./bin/Darts_BHT $(HOME)/.darts/
+	cp -f ./bin/Darts_BHT.mp $(HOME)/.darts/Darts_BHT
 	chmod +x $(HOME)/.darts/Darts_BHT
 
 uninstall:

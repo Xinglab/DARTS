@@ -1,7 +1,9 @@
 #!/usr/bin/env Rscript
 
-# Wrapper for Darts_BHT R package
+# Multi-threading wrapper of Darts_BHT
 # Zijun Zhang
+# 3.19.2018
+## BELOW ARE OLD HISTORY
 # 5.14.2017
 # revised 7.1.2017: modified `Spider` to accept informative prior
 # revised 7.2.2017: added options and a function to rescale informative prior
@@ -10,12 +12,16 @@
 # revised 8.20.2017: added random_state for reproducibility
 # revised 3.19.2018: moved rescaling-related functions to `rescale_by_bias.R`
 # revised 3.19.2018: use new bias-estimates to rescale
+# revised 3.19.2018: The multi-threading wrapper is now the default interface for Darts_BHT
 
 library('Darts')
 
-Darts = function(in_fn, out_dir, C=0.05, rho_fn=NA, verbose=1, random_state=777)
+VERSION = "0.1.2"
+AUTHOR = "Zijun Zhang <zj.z@ucla.edu>"
+
+Darts = function(in_fn, out_dir, C=0.05, rescale_meth=1, rho_fn=NA, verbose=1, random_state=777)
 {
-	out_fn = file.path(out_dir, ifelse(is.na(rho_fn), 'Sp_out.RData', 'Sp_out.prior.RData'))
+	out_fn = file.path(out_dir, ifelse(is.na(rho_fn), 'darts_bht.flat.RData', 'dart_bht.info.RData'))
 	if(class(in_fn)=="character") {
 		data=read.table(in_fn, sep='\t', header=T)
 	} else if(class(in_fn)=="data.frame")
@@ -25,32 +31,36 @@ Darts = function(in_fn, out_dir, C=0.05, rho_fn=NA, verbose=1, random_state=777)
 	if("IJC_SAMPLE_1" %in% colnames(data)) {
 		data = match_input_column_names(data)
 	}
+	res = data
 	if(class(rho_fn)=="character")
 	{
 		rho.df = read.table(rho_fn, header=T)
-		# DEPRECATED on 3.19.2018: use data-specific bias estimation
-		#rho.df$rho = rescale_binary_prediction(rho.df$Y_pred, mu0.new=0.05, mu1.new=0.95, sd0.new=0.1, sd1.new=0.1, boundary=0.05)
-		rho.df$rho = rescale_by_bias(rho.df$Y_pred, rho.df$Y_true)
+		if(rescale_meth==1) {
+			rho.df$rho = rescale_binary_prediction(rho.df$Y_pred, mu0.new=0.05, mu1.new=0.95, sd0.new=0.1, sd1.new=0.1, boundary=0.05)
+		}else
+		{
+			rho.df$rho = rescale_by_bias(rho.df$Y_pred, rho.df$Y_true)
+		}
 		idx = match(data$ID, rho.df$ID)
 		data$rho = rho.df$rho[idx]
 	} else {
 		if(! "rho" %in% colnames(data))
 			data$rho = rep(0.5, nrow(data))
 	}
-	res = data
-	res$mu.mle = NA
-	res$delta.mle = NA
-	res$post_pr = NA
+	#res$mu.mle = NA
+	#res$delta.mle = NA
+	#res$post_pr = NA
 	delta_quantiles = seq(-0.99, 0.99, 0.01)
 	delta_quantiles = as.vector(delta_quantiles)
 	res_dict = matrix(NA, nrow=nrow(data), ncol=length(delta_quantiles))
 	rownames(res_dict) = data$exon_id
 	
-	pb = utils::txtProgressBar(min = 0, max = nrow(data), initial = 0) 
-	for(i in 1:nrow(data))
+	pb = utils::txtProgressBar(min = 0, max = nrow(data), initial = 0, style=3)
+	progress = function(n) utils::setTxtProgressBar(pb, n)
+	opts = list(progress=progress)
+	#for(i in 1:nrow(data))
+	mp.res = foreach(i=1:nrow(data), .packages='Darts', .options.snow=opts, .combine='rbind') %dopar%
 	{
-		if(verbose==2 && ! i%%200) cat(format(Sys.time(), "%c"), i,'/',nrow(data), '\n')
-		if(verbose==1) utils::setTxtProgressBar(pb,i)
 		id=data$ID[i]
 		I1=data$I1[i]
 		S1=data$S1[i]
@@ -63,8 +73,8 @@ Darts = function(in_fn, out_dir, C=0.05, rho_fn=NA, verbose=1, random_state=777)
 		this_data = list(I1=I1, S1=S1, I2=I2, S2=S2)
 		is_healthy = check_data_sanity(this_data)
 		if(! is_healthy) {
-			next
-		}
+			this = NULL
+		} else {
 		set.seed(random_state)
 		post = darts_bayesian_gibbs(rho=this_rho, data=this_data, 
 			tau1=0.3, tau2=0.03,
@@ -74,17 +84,28 @@ Darts = function(in_fn, out_dir, C=0.05, rho_fn=NA, verbose=1, random_state=777)
 		res_dict[i,] = post_cdf
 		right = which(abs(delta_quantiles-abs(C))<0.0001)
 		left = which(abs(delta_quantiles+abs(C))<0.0001)
-		res$post_pr[i] = 1-post_cdf[right] + post_cdf[left]
-		res$mu.mle[i] = I1/inc_len / (I1/inc_len + S1/skp_len)
-		res$delta.mle[i] = I2/inc_len / (I2/inc_len + S2/skp_len) - I1/inc_len / (I1/inc_len + S1/skp_len)
+		
+		#res$post_pr[i] = 1-post_cdf[right] + post_cdf[left]
+		#res$mu.mle[i] = I1/inc_len / (I1/inc_len + S1/skp_len)
+		#res$delta.mle[i] = I2/inc_len / (I2/inc_len + S2/skp_len) - I1/inc_len / (I1/inc_len + S1/skp_len)
+		this = data.frame( 
+			ID = id, 
+			mu.mle = I1/inc_len / (I1/inc_len + S1/skp_len),
+			delta.mle = I2/inc_len / (I2/inc_len + S2/skp_len) - I1/inc_len / (I1/inc_len + S1/skp_len),
+			post_pr = 1-post_cdf[right] + post_cdf[left],
+			stringsAsFactors=F
+			)
+		}
+		this
 	}
 	close(pb)
-	save(res_dict, file=out_fn)
+	res = merge(res, mp.res, by='ID')
+	#save(res_dict, file=out_fn)
 	return(res)
 }
 
 
-Darts_replicate = function(in_fn, out_dir, C=0.05, rho_fn=NA, 
+Darts_replicate = function(in_fn, out_dir, rescale_meth=1, C=0.05, rho_fn=NA, 
 	estim_groupVar_prior=TRUE, is_paired=FALSE, pooling=FALSE, verbose=1, random_state=777)
 {
 	out_fn = file.path(out_dir, ifelse(is.na(rho_fn), 'Sp_out.RData', 'Sp_out.prior.RData'))
@@ -97,22 +118,21 @@ Darts_replicate = function(in_fn, out_dir, C=0.05, rho_fn=NA,
 	if("IJC_SAMPLE_1" %in% colnames(data)) {
 		data = match_input_column_names(data)
 	}
+	res = data
 	if(class(rho_fn)=="character")
 	{
 		rho.df = read.table(rho_fn, header=T)
-		# DEPRECATED on 3.19.2018: use data-specific bias estimation
-		# rho.df$rho = rescale_binary_prediction(rho.df$Y_pred, mu0.new=0.05, mu1.new=0.95, sd0.new=0.1, sd1.new=0.1, boundary=0.05)
-		rho.df$rho = rescale_by_bias(rho.df$Y_pred, rho.df$Y_true)
+		if(rescale_meth==1) {
+			rho.df$rho = rescale_binary_prediction(rho.df$Y_pred, mu0.new=0.05, mu1.new=0.95, sd0.new=0.1, sd1.new=0.1, boundary=0.05)
+		} else {
+			rho.df$rho = rescale_by_bias(rho.df$Y_pred, rho.df$Y_true)
+		}
 		idx = match(data$ID, rho.df$ID)
 		data$rho = rho.df$rho[idx]
 	} else {
 		if(! "rho" %in% colnames(data))
 			data$rho = rep(0.5, nrow(data))
 	}
-	res = data
-	res$mu.mle = NA
-	res$delta.mle = NA
-	res$post_pr = NA
 	delta_quantiles = seq(-0.99, 0.99, 0.01)
 	delta_quantiles = as.vector(delta_quantiles)
 	res_dict = matrix(NA, nrow=nrow(data), ncol=length(delta_quantiles))
@@ -125,8 +145,12 @@ Darts_replicate = function(in_fn, out_dir, C=0.05, rho_fn=NA,
 	} else {
 			sgm_prior_fit = NA
 	}
-	pb = utils::txtProgressBar(min = 0, max = nrow(data), initial = 0) 
-	for(i in 1:nrow(data))
+	
+	pb = utils::txtProgressBar(min = 0, max = nrow(data), initial = 0, style=3)
+	progress = function(n) utils::setTxtProgressBar(pb, n)
+	opts = list(progress=progress)
+	#for(i in 1:nrow(data))
+	mp.res = foreach(i=1:nrow(data), .packages='Darts', .options.snow=opts, .combine='rbind') %dopar%
 	{
 		if(verbose==2 && ! i%%200) cat(format(Sys.time(), "%c"), i,'/',nrow(data), '\n')
 		if(verbose==1) utils::setTxtProgressBar(pb,i)
@@ -153,35 +177,66 @@ Darts_replicate = function(in_fn, out_dir, C=0.05, rho_fn=NA,
 		if(pooling) { 
 			this_data = collapse_replicates(this_data)
 			is_healthy = check_data_sanity(this_data)
-			if(! is_healthy) next
-			post = darts_bayesian_gibbs(rho=this_rho, data=this_data, 
-				tau1=0.3, tau2=0.03,
-				inc_eff_len=inc_len, skp_eff_len=skp_len)
-			res$I1[i] = this_data$I1
-			res$I2[i] = this_data$I2
-			res$S1[i] = this_data$S1
-			res$S2[i] = this_data$S2
-		
+			if(! is_healthy) {
+				this = NULL
+			} else {
+				post = darts_bayesian_gibbs(rho=this_rho, data=this_data, 
+					tau1=0.3, tau2=0.03,
+					inc_eff_len=inc_len, skp_eff_len=skp_len)
+				# res$I1[i] = this_data$I1
+				# res$I2[i] = this_data$I2
+				# res$S1[i] = this_data$S1
+				# res$S2[i] = this_data$S2
+			}
+			this
 		} else {
 			is_healthy = check_data_sanity_replicate(this_data)
 			if(! is_healthy) {
-				next
-			}
+				this = NULL
+			} else {
 			post = rdarts_bayesian_gibbs(rho=this_rho, data=this_data, 
 				tau1=0.3, tau2=0.03, sgm_prior_fit=sgm_prior_fit,
 				inc_eff_len=inc_len, skp_eff_len=skp_len)
+			}
 		}
 		set.seed(NULL)
-		post_cdf = sapply(delta_quantiles, function(x) mean(post[,2]<x))
-		res_dict[i,] = post_cdf
-		right = which(abs(delta_quantiles-abs(C))<0.0001)
-		left = which(abs(delta_quantiles+abs(C))<0.0001)
-		res$post_pr[i] = 1-post_cdf[right] + post_cdf[left]
-		res$mu.mle[i] = sum(I1)/inc_len / (sum(I1)/inc_len + sum(S1)/skp_len)
-		res$delta.mle[i] = sum(I2)/inc_len / (sum(I2)/inc_len + sum(S2)/skp_len) - sum(I1)/inc_len / (sum(I1)/inc_len + sum(S1)/skp_len)
+		if(is_healthy) {
+			post_cdf = sapply(delta_quantiles, function(x) mean(post[,2]<x))
+			#res_dict[i,] = post_cdf
+			right = which(abs(delta_quantiles-abs(C))<0.0001)
+			left = which(abs(delta_quantiles+abs(C))<0.0001)
+			#res$post_pr[i] = 1-post_cdf[right] + post_cdf[left]
+			#res$mu.mle[i] = sum(I1)/inc_len / (sum(I1)/inc_len + sum(S1)/skp_len)
+			#res$delta.mle[i] = sum(I2)/inc_len / (sum(I2)/inc_len + sum(S2)/skp_len) - sum(I1)/inc_len / (sum(I1)/inc_len + sum(S1)/skp_len)
+			if(pooling) {
+				this = data.frame(
+					ID = id,
+					I1.p = this_data$I1,
+					S1.p = this_data$S1,
+					I2.p = this_data$I2,
+					S2.p = this_data$S2,
+					rho = this_rho,
+					mu.mle = sum(I1)/inc_len / (sum(I1)/inc_len + sum(S1)/skp_len),
+					delta.mle = sum(I2)/inc_len / (sum(I2)/inc_len + sum(S2)/skp_len) - sum(I1)/inc_len / (sum(I1)/inc_len + sum(S1)/skp_len),
+					post_pr = 1-post_cdf[right] + post_cdf[left],
+					stringsAsFactors=F
+					)
+			} else {
+				this = data.frame(
+					ID = id,
+					rho = this_rho,
+					mu.mle = mean( I1/inc_len / (I1/inc_len + S1/skp_len) ),
+					delta.mle = mean( I2/inc_len / (I2/inc_len + S2/skp_len) ) - mean( I1/inc_len / (I1/inc_len + S1/skp_len) ),
+					post_pr = 1-post_cdf[right] + post_cdf[left],
+					stringsAsFactors=F
+					)
+			}
+		}
+		this
 	}
 	close(pb)
-	save(res_dict, file=out_fn)
+	#save(res_dict, file=out_fn)
+	res = merge(res, mp.res, by='ID')
 	return(res)
 }
 
@@ -250,7 +305,9 @@ if(length(argv)>0)
 		'input'  , 'i', 1, "character", "input file in Darts/rMATS format (required)",
 		'rho'    , 'r', 2, "character", "prior file in Darts/rMATS format (optional, if none then flat prior i.e. rho=0.5)",
 		'out'    , 'o', 1, "character", "output directory (required)",
+		'thread' , 'p', 2, "integer",   "Number of threads (optional, default using all the cores available)",
 		'cutoff' , 'c', 2, "double",    "Cutoff of Posterior probability, must be in (0,1) (optional, default=0.05)",
+   'rescale_meth', 'w', 2, "integer",   "Rescaling method (optional, 1:Gaussian mixture, 2:bias estimates, default=1)",
 		'rep'    , 'k', 2, "integer",   "run replicate [pair/unpair] model (optional, 0:no replicate, 1:unpaired, 2:paired, default=0)",
 		'pool'   , 'm', 2, "logical",   "merge the replicates, valid only when rep>0, default: FALSE",
      'estim_gVar', 'g', 2, "logical",   "Use prior to estimate within group variance, default: FALSE",
@@ -259,11 +316,13 @@ if(length(argv)>0)
 	),ncol=5,byrow=T)
 
 	opt = getopt(spec)
-	quit_session = function() { cat(paste(getopt(spec, usage=T),"\n"));q(); }
+	quit_session = function() { cat("Darts_BHT statistical model\nversion",VERSION,"\n");cat(paste(getopt(spec, usage=T),"\n")); cat("For questions and bugs, please contact", AUTHOR,"\n"); q(); }
 	# assign default values
+	if ( is.null(opt$thread ) ) { opt$thread = parallel::detectCores() }
 	if ( is.null(opt$verbose ) ) { opt$verbose = FALSE }
 	if ( is.null(opt$cutoff ) ) { opt$cutoff = 0.05 }
 	if ( is.null(opt$rho ) ) { opt$rho = NA }
+	if ( is.null(opt$rescale_meth) ) { opt$rescale_meth=1 } 
 	if ( is.null(opt$rep ) ) { opt$rep = 0 }
 	if ( is.null(opt$pool ) ) { opt$pool = FALSE } else { opt$pool = TRUE }
 	if ( is.null(opt$estim_gVar) ) { opt$estim_gVar=FALSE }  else { opt$estim_gVar=TRUE } 
@@ -288,25 +347,38 @@ if(length(argv)>0)
 		quit_session()
 	}
 	
+	if( opt$rescale_meth<0 || opt$rescale_meth>2 ) {
+		cat("Invalid rescaling option.\n")
+		quit_session()
+	}
+	
 	if( opt$rep==0 && opt$pool==TRUE ) {
 		cat("You specified no-replicate model, hence merging replicates is not valid.\n")
 		quit_session()
 	}
 	
-	## call stats model
 	if(is.na(opt$rho)) {
-		out_rdata_fn = file.path(opt$out, "darts_out.flat.RData")
-		out_table_fn = file.path(opt$out, "darts_out.flat.txt")
+		out_rdata_fn = file.path(opt$out, "darts_bht.flat.RData")
+		out_table_fn = file.path(opt$out, "darts_bht.flat.txt")
 	} else {
-		out_rdata_fn = file.path(opt$out, "darts_out.info.RData")
-		out_table_fn = file.path(opt$out, "darts_out.info.txt")
+		out_rdata_fn = file.path(opt$out, "darts_bht.info.RData")
+		out_table_fn = file.path(opt$out, "darts_bht.info.txt")
 	}
+	
+	## register multi-threading machine
+	cat("no. of threads using =", opt$thread, '\n')
+	suppressMessages(library('doSNOW'))
+	cl = makeSOCKcluster(opt$thread)
+	registerDoSNOW(cl)
+	
+	## call stats model
 	if( opt$rep==0 ) {
-		res = Darts(opt$input, opt$out, C=opt$cutoff, rho_fn=opt$rho, verbose=opt$verbose)
+		res = Darts(opt$input, opt$out, rescale_meth=opt$rescale_meth, C=opt$cutoff, rho_fn=opt$rho, verbose=opt$verbose)
 	} else
 	{
 		is_paired = ifelse(opt$rep==2, TRUE, FALSE)
-		res = Darts_replicate(opt$input, opt$out, C=opt$cutoff, rho_fn=opt$rho, is_paired=is_paired, pooling=opt$pool, estim_groupVar_prior=opt$estim_gVar, verbose=opt$verbose)
+		res = Darts_replicate(opt$input, opt$out, rescale_meth=opt$rescale_meth, C=opt$cutoff, rho_fn=opt$rho, is_paired=is_paired, pooling=opt$pool, estim_groupVar_prior=opt$estim_gVar, verbose=opt$verbose)
 	}
+	stopCluster(cl)
 	write.table(res, file=out_table_fn, quote=F, row.names=F, sep='\t')
 }
