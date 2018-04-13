@@ -127,7 +127,7 @@ def add_pred_parser( subparsers ):
 	
 	ag_pred.add_argument("-o", "--output", dest="output", type=str, required=True,
 		help="Output filename")
-	ag_pred.add_argument("-m", "--model", dest="model", type=str, required=True,
+	ag_pred.add_argument("-m", "--model", dest="model", type=str, required=False,
 		help="Filepath for a model file; default using internal Darts_DNN trained on ENCODE+Roadmap")
 	return
 
@@ -139,7 +139,7 @@ def add_build_feature_parser( subparsers ):
 	ag_build_feature.add_argument("-i", "--input", dest="input", type=str, required=True,
 		help="A list of exon-skipping events; Darts-flat output")
 	
-	ag_build_feature.add_argument("-c", "--cis-feature", dest="cis", type=str, required=True,
+	ag_build_feature.add_argument("-c", "--cis-feature", dest="cis", type=str, required=False,
 		help="File path for exon cis features (Normalized); default using downloaded from Github")
 	
 	ag_build_feature.add_argument("-e", "--expression", dest="expr", nargs='+', type=str, required=True,
