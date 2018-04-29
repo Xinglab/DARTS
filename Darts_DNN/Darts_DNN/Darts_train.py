@@ -61,7 +61,7 @@ def construct_training_data(tar_dir, experiment_full, lite=False, annot_only=Fal
 	if annot_only:
 		annot_evt = read_annot_evt()
 	if not os.path.isfile(os.path.join(tar_dir, experiment_full, 'data.kallisto.h5')):
-		logging.debug('this file is not found: %s'%os.path.join(tar_dir, experiment_full, 'data.kallisto.h5'))
+		logger.debug('this file is not found: %s'%os.path.join(tar_dir, experiment_full, 'data.kallisto.h5'))
 	with h5py.File(os.path.join(tar_dir, experiment_full, 'data.kallisto.h5'), 'r') as store:
 		X = store['X'][:]
 		Y = store['Y'][:]
@@ -127,7 +127,7 @@ def read_data_batch_encode(target_dir_encode, n_epoch=500, verbose=True):
 		target, cell, experiment = experiment_full.split('_')
 		target2exp[target].append(experiment_full)
 	for epoch in range(n_epoch):
-		if verbose: logging.debug(">> Encode epoch "+str(epoch))
+		if verbose: logger.debug(">> Encode epoch "+str(epoch))
 		all_targets = np.asarray([x for x in target2exp.keys() if target2exp[x][0] not in leave_out_data])
 		while len(all_targets)>0:
 			try:
@@ -188,7 +188,7 @@ def read_data_batch_roadmap(target_dir_roadmap, n_epoch=500, verbose=True):
 			exp not in roadmap_leave_out:
 			experiment_list.append(exp)
 	for epoch in range(n_epoch):
-		if verbose:  logging.debug(">> Roadmap epoch "+str(epoch))
+		if verbose:  logger.debug(">> Roadmap epoch "+str(epoch))
 		all_targets = np.asarray([x for x in experiment_list])
 		while len(all_targets)>0:
 			try:
@@ -286,10 +286,10 @@ def train_dnn_classifier(odir='.',target_dir_encode = '/home/zzj/scratch/Darts_d
 		y_pred = clf.predict(test_data['X'])[:,1]
 		auroc=metrics.roc_auc_score(test_data['Y'][:,1], y_pred)
 		aupr=metrics.average_precision_score(test_data['Y'][:,1], y_pred)
-		logging.debug(msg)
-		logging.debug('auroc='+str(auroc))
-		logging.debug('aupr='+str(aupr))
-		logging.debug('val_roc='+str(best_auc))
+		logger.debug(msg)
+		logger.debug('auroc='+str(auroc))
+		logger.debug('aupr='+str(aupr))
+		logger.debug('val_roc='+str(best_auc))
 		if auroc>best_val_auc:
 			best_val_auc = auroc
 			clf.model.save(os.path.join(odir,'best_val_model.h5'))
@@ -298,11 +298,11 @@ def train_dnn_classifier(odir='.',target_dir_encode = '/home/zzj/scratch/Darts_d
 	return	
 
 def parser( args ):
-	logging.debug('program starts.')
+	logger.debug('program starts.')
 	odir = args.out_dir
 	idir_list = args.train_dir
 	if len(idir_list)==2:
 		train_dnn_classifier(odir, idir_list[0], idir_list[1])
 	else:
 		train_dnn_classifier(odir, idir_list[0], None)
-	logging.debug('training finished.')
+	logger.debug('training finished.')
