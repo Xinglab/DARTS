@@ -62,11 +62,15 @@ def construct_training_data(tar_dir, experiment_full, lite=False, annot_only=Fal
 		annot_evt = read_annot_evt()
 	if not os.path.isfile(os.path.join(tar_dir, experiment_full, 'data.kallisto.h5')):
 		logger.info('this file is not found: %s'%os.path.join(tar_dir, experiment_full, 'data.kallisto.h5'))
-	with h5py.File(os.path.join(tar_dir, experiment_full, 'data.kallisto.h5'), 'r') as store:
-		X = store['X'][:]
-		Y = store['Y'][:]
-		colnames = store['colnames'][:]
-		rownames = store['rownames'][:]
+	try:
+		with h5py.File(os.path.join(tar_dir, experiment_full, 'data.kallisto.h5'), 'r') as store:
+			X = store['X'][:]
+			Y = store['Y'][:]
+			colnames = store['colnames'][:]
+			rownames = store['rownames'][:]
+	except:
+		logger.debug('cannot load: %s' % os.path.join(tar_dir, experiment_full, 'data.kallisto.h5'))
+		raise Exception()
 	idx = [i for i in range(len(X)) if not any(np.isnan(X[i])) and
 		(not annot_only or rownames[i,0] in annot_evt) and
 		np.sum(np.asarray(rownames[i,4:6],dtype='int'))>20 and
@@ -144,7 +148,10 @@ def read_data_batch_encode(target_dir_encode, n_epoch=500, verbose=True):
 			for target in current_target_list:
 				if len(target2exp[target])<2: continue
 				for experiment_full in target2exp[target]:
-					train_data = construct_training_data(target_dir_encode, experiment_full)
+					try:
+						train_data = construct_training_data(target_dir_encode, experiment_full)
+					except:
+						continue
 					if verbose: 
 						print("... "+experiment_full)
 						print("... pos={0}, neg={1}".format(
@@ -203,7 +210,10 @@ def read_data_batch_roadmap(target_dir_roadmap, n_epoch=500, verbose=True):
 			tmp_x = []
 			tmp_y = []
 			for experiment_full in current_target_list:
-				train_data = construct_training_data(target_dir_roadmap, experiment_full)
+				try:
+					train_data = construct_training_data(target_dir_roadmap, experiment_full)
+				except:
+					continue
 				if verbose: 
 					print("... "+experiment_full)
 					print("... pos={0}, neg={1}".format(
