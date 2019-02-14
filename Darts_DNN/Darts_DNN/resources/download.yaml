@@ -1,0 +1,21 @@
+v0.0.1:
+  cisFeatures:
+      SE:
+        url: https://xinglab.cass.idre.ucla.edu/public/zijun/DARTS/v0.0.1/cisFeatures/ENCODE_sequenceFeature_absmax_normalized.h5
+        md5sum: None
+
+
+v0.1.0:
+  cisFeatures:
+    SE:
+      url: https://xinglab.cass.idre.ucla.edu/public/zijun/DARTS/v0.1.0/cisFeatures/SE.h5
+      md5sum: None
+    A3SS:
+      url: https://xinglab.cass.idre.ucla.edu/public/zijun/DARTS/v0.1.0/cisFeatures/A3SS.norm.txt.gz
+      md5sum: None
+    A5SS:
+      url: https://xinglab.cass.idre.ucla.edu/public/zijun/DARTS/v0.1.0/cisFeatures/A5SS.norm.txt.gz
+      md5sum: None
+    RI:
+      url: https://xinglab.cass.idre.ucla.edu/public/zijun/DARTS/v0.1.0/cisFeatures/RI.norm.txt.gz
+      md5sum: None

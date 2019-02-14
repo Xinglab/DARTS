@@ -16,9 +16,13 @@ def main():
 		  
 		  url='https://github.com/Xinglab/DARTS',
 		  
-		  packages=['Darts_DNN'],
+		  packages=['Darts_DNN', 'Darts_DNN.resources'],
 		  
-		  scripts=['bin/Darts_DNN']
+		  scripts=['bin/Darts_DNN'],
+
+		  include_package_data=True,
+
+		  package_data={'Darts_DNN.resources':['rbp_max.tsv']}
 		 )
 	return
 

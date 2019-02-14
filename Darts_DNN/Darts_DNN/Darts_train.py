@@ -21,15 +21,12 @@ import tempfile
 
 from keras.optimizers import RMSprop, SGD
 from keras.utils import np_utils
-from Darts_DNN.sklearn_nn import *
+from .sklearn_nn import *
 
 logger = logging.getLogger('Darts_DNN.train')
 
 #### global variables ####
-
-# number of total features
 feature_num = 5922
-
 # temporary dir
 #tmp_dir = './tmp'
 tmp_dir = tempfile.tempdir
@@ -249,17 +246,10 @@ def read_data_batch_roadmap(target_dir_roadmap, n_epoch=500, verbose=True):
 	return
 
 
-def train_dnn_classifier(odir='.',target_dir_encode = '/home/zzj/scratch/Darts_deepLearning/ENCODE',target_dir_roadmap = '/home/zzj/scratch/Darts_deepLearning/Roadmap'):
+def train_dnn_classifier(event_type, odir='.',target_dir_encode = '/home/zzj/scratch/Darts_deepLearning/ENCODE',target_dir_roadmap = '/home/zzj/scratch/Darts_deepLearning/Roadmap'):
 	# build dnn model
 	clf = KerasNeuralNetClassifier(
-		n_in=feature_num, 
-		n_out=2,
-		n_hidden=[1200, 500, 300, 200],
-		dropout=[0, 0.6, 0.5, 0.3, 0.1],
-		n_epoches=1,
-		batch_size=1000,
-		optimizer='RMSprop',
-		batch_norm=True
+		**CURRENT_ARCHITECTURE[event_type]
 		)
 	try:
 		clf.model.load_weights(os.path.join(odir,'.keras_model.h5'))
