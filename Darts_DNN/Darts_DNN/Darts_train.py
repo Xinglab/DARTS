@@ -25,14 +25,12 @@ from .sklearn_nn import *
 from . import config
 
 logger = logging.getLogger('Darts_DNN.train')
-
-#### global variables ####
 # temporary dir
 tmp_dir = tempfile.tempdir
 logger.info('tmp_dir='+tmp_dir)
 
 
-def write_current_pred(y_pred, fn):
+def write_current_pred(test_data, y_pred, fn):
 	with open(fn, 'w') as fo:
 		for i in range(len(test_data['rownames'])):
 			fo.write('\t'.join([
@@ -55,7 +53,7 @@ def read_data_batch(train_fp, test_data, data_source_id, seqFeature_df, geneExp_
 				idx = random.sample(range(len(all_targets)), 4)
 			except ValueError:  # not enough for sampling
 				idx = np.arange(len(all_targets))
-			current_target_list = all_targets[idx]]
+			current_target_list = all_targets[idx]
 			all_targets = np.delete(all_targets, idx)
 			msg = ''
 			tmp_x = []
@@ -78,7 +76,9 @@ def read_data_batch(train_fp, test_data, data_source_id, seqFeature_df, geneExp_
 					input_fn = train_list.loc[ID].input_fn
 					train_data = construct_training_data_from_h5(
 						input_fn,
-						in_training_phase=True) 
+						in_training_phase=True)
+				else:
+					raise Exception('input_filelist format not understood. Check online documentation for examples.')
 				if verbose: 
 					print("... "+experiment_full)
 					print("... pos={0}, neg={1}".format(
@@ -134,8 +134,8 @@ def train_dnn_classifier(event_type, train_filelist, odir='.'):
 		}
 
 	# read in seqFeature and geneExp_absmax for reference of different generators
-	geneExp_absmax = read_geneExp_absmax(config.CURRENT_TRANS_PATH[args.event_type])
-	seqFeature_df = read_sequence_feature(config.CURRENT_CIS_PATH[args.event_type])
+	geneExp_absmax = read_geneExp_absmax(config.CURRENT_TRANS_PATH[event_type])
+	seqFeature_df = read_sequence_feature(config.CURRENT_CIS_PATH[event_type])
 
 	# prepare the generator each dataset iteratively
 	gen_list = [
@@ -147,16 +147,17 @@ def train_dnn_classifier(event_type, train_filelist, odir='.'):
 			geneExp_absmax) 
 		for i in range(len(train_filelist))
 		]
-	index = 0
+	step = 0
 	best_val_auc = 0
+	patience = 0
 	while True:
-		index += 1
+		step += 1
 		tmp_X = []
 		tmp_y = []
 		msg = ''
 		for gen in gen_list:
 			try:
-				Y_batch, X_batch, msg_batch = gen.next()
+				Y_batch, X_batch, msg_batch = next(gen)
 				tmp_X.append(X_batch)
 				tmp_y.append(Y_batch)
 				msg += msg_batch
@@ -178,19 +179,28 @@ def train_dnn_classifier(event_type, train_filelist, odir='.'):
 		logger.info('auroc=%.3f'%(auroc))
 		logger.info('aupr=%.3f'%(aupr))
 		logger.info('val_roc=%.3f'%(best_auc))
-		if auroc>best_val_auc:
+		if auroc > best_val_auc:
 			best_val_auc = auroc
+			patience = 0
 			clf.model.save(os.path.join(odir,'{}.h5'.format(event_type)))
-		if not index%10:
-			write_current_pred(y_pred, os.path.join(tmp_dir, 'batch_{0}_pred.txt'.format(index)))
+		else:
+			patience += 1
+			if patience > config.MAX_TRAIN_PATIENCE:
+				logger.info('early stop @ train episode %i.'%step)
+				break
+		if not step%10:
+			write_current_pred(test_data, y_pred, os.path.join(tmp_dir, 'batch_{0}_pred.txt'.format(step)))
 	return	
 
 def parser( args ):
+	# parse options
 	logger.info('program starts.')
 	odir = args.out_dir
-	train_filelist = args.train_filelist
+	train_filelist = args.input_filelist
 	event_type = args.event_type
 	assert len(train_filelist)<=2, Exception('current version accepts at most 2 train file lists.')
+
+	# training
 	train_dnn_classifier(event_type, train_filelist, odir)
 
 	logger.info('training finished.')

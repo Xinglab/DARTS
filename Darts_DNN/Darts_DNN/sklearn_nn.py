@@ -8,7 +8,6 @@ from keras.layers import Dense, Dropout, Activation, Input
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import RMSprop, SGD
 from keras.constraints import maxnorm
-import theano.tensor as T
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.callbacks import Callback
 

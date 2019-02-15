@@ -35,9 +35,9 @@ def split_data_fold(X, Y, n_fold=5, fold_id=0, shuffle=True, random_seed=123, *a
 	"""
 	assert fold_id < n_fold
 	random.seed(random_seed)
-	idx = range(X.shape[0])
+	idx = np.arange(X.shape[0])
 	if shuffle: 
-		for n in range(100): random.shuffle(idx)
+		for n in range(10): np.random.shuffle(idx)
 	_X = np.asarray(X[idx,], dtype=K.floatx())
 	_Y = np.asarray([Y[i] for i in idx], dtype='float32')
 	fold_size = len(idx) // n_fold
@@ -75,8 +75,8 @@ def split_imbalance_data(X, Y, prop_test=0.1, random_seed=123456, *args):
 	r1_index = split_y_by_label(Y, 1)
 	idx = range(X.shape[0])
 	
-	for n in range(10): random.shuffle(r0_index)
-	for n in range(10): random.shuffle(r1_index)
+	for n in range(10): np.random.shuffle(r0_index)
+	for n in range(10): np.random.shuffle(r1_index)
 	
 	_X = np.asarray(X, dtype='float32')
 	_Y = np.asarray(Y, dtype='float32')
@@ -113,7 +113,7 @@ def split_data_tier(X, Y, R, T=2, percents=None, shuffle=True, verbose=True):
 	if percents is None: percents = np.concatenate([np.arange(0., 1., step=1./T)[1:],[1.]]) * 100.
 	R0_percentiles = np.percentile([R[i] for i in range(len(Y)) if Y[i]==0], percents)
 	R1_percentiles = np.percentile([R[i] for i in range(len(Y)) if Y[i]==1], percents)
-	if verbose: print [R0_percentiles, R1_percentiles]
+	if verbose: print([R0_percentiles, R1_percentiles])
 	R0_index = []
 	R1_index = []
 	prev_percent = -np.inf
@@ -150,7 +150,7 @@ def construct_balanced_minibatch(index, R0_idx, R1_idx, batch_size, pos_prop=0.5
 	else:
 		R1_sam = R1_idx[(index*b1_size%n1):] + R1_idx[:((index+1)*b1_size%n1)]
 	sam = R0_sam + R1_sam
-	if shuffle: random.shuffle(sam)
+	if shuffle: np.random.shuffle(sam)
 	return sam
 
 
@@ -236,17 +236,17 @@ def train_keras_balanced_model(model, x_train, y_train, x_val, y_val,
 					best_auc = this_auc
 					best_iter = iter
 					model.save(save_model_name)
-					print "-"*50
-					print epoch
-					print ("     epoch %i, minibatch %i/%i") % (epoch, index+1, n_train_batches)
-					print "best auc = "+str(best_auc)
-					print "-"*50
+					print("-"*50)
+					print(epoch)
+					print(("     epoch %i, minibatch %i/%i") % (epoch, index+1, n_train_batches))
+					print("best auc = "+str(best_auc))
+					print("-"*50)
 			if patience <= iter:
 				done_looping=True
 				break
 		#epoch += 1
 	model.load_weights(save_model_name)
-	print "Optimization complete. Best auc="+str(best_auc)+'@ iter ' +str(best_iter)
+	print("Optimization complete. Best auc="+str(best_auc)+'@ iter ' +str(best_iter))
 	return best_auc
 
 
@@ -288,7 +288,9 @@ def construct_training_data_from_label(label_fn, geneExp_fn, seqFeature_df, gene
 		raise Exception('this file is not found: %s'%geneExp_fn)
 	# read in two sets of labelled events
 	# from the DARTS BHT-flat output
-	pos, neg = read_label_fn(label_fn, in_training_phase)
+	pos, neg = read_label_fn(label_fn, in_training_phase=in_training_phase)
+	#print('in construct, pos='+str(len(pos)))
+	#print('in construct, neg='+str(len(neg)))
 	pos_neg = pos + neg
 	# read in the gene expression for this
 	# comparison, and make it a matrix of
@@ -313,9 +315,9 @@ def read_sequence_feature(fn=None):
 	if not os.path.isfile(fn):
 		raise Exception('cis feature file not found: %s'%fn)
 	if fn.endswith('h5') or fn.endswith('hdf5'):
-		data=pd.read_hdf(fn)
-	elif fn.endswith('txt'):
-		data=pd.read_table(fn)
+		data = pd.read_hdf(fn)
+	elif fn.endswith('txt') or fn.endswith('gz'):
+		data = pd.read_table(fn)
 		data.index = data.ID
 		data.drop(columns='ID', inplace=True)
 	return data
