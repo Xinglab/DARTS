@@ -250,24 +250,30 @@ def train_keras_balanced_model(model, x_train, y_train, x_val, y_val,
 	return best_auc
 
 
-def construct_data_from_h5(fn, covg_filter=20):
+def construct_data_from_h5(fn, covg_filter=20, in_training_phase=False):
 	with h5py.File(fn, 'r') as store:
 		X = store['X'][:]
 		Y = store['Y'][:]
 		colnames = store['colnames'][:]
 		rownames = store['rownames'][:]
-	idx = [i for i in range(len(X)) if not any(np.isnan(X[i])) and
-		np.sum(np.asarray([int(float(x)) for a in rownames[i,4:6] for x in a.split(',') ]))>covg_filter and
-		np.sum(np.asarray([int(float(x)) for a in rownames[i,6:8] for a in a.split(',') ]))>covg_filter #and
-		## we need to get rid of negative cases, so
-		## THIS WAS USED IN TRAINING; BUT DEPRECATED IN PREDICTION
-		#(Y[i]>0.9 or
-		#	# min(I1, S1)>2
-		#	(np.min(np.asarray(rownames[i,4:6],dtype='int'))>2 and
-		#	# min(I2, S2)>2
-		#	np.min(np.asarray(rownames[i,6:8],dtype='int'))>2)
-		#)
-		]
+	if in_training_phase:
+		idx = [i for i in range(len(X)) if not any(np.isnan(X[i])) and
+			np.sum(np.asarray([int(float(x)) for a in rownames[i,4:6] for x in a.split(',') ]))>covg_filter and
+			np.sum(np.asarray([int(float(x)) for a in rownames[i,6:8] for a in a.split(',') ]))>covg_filter and
+			## we need to get rid of negative cases, so
+			## THIS WAS USED IN TRAINING; BUT DEPRECATED IN PREDICTION
+			(Y[i]>0.9 or
+				# min(I1, S1)>2
+				(np.min(np.asarray(rownames[i,4:6],dtype='int'))>2 and
+				# min(I2, S2)>2
+				np.min(np.asarray(rownames[i,6:8],dtype='int'))>2)
+			)
+			]
+	else:
+		idx = [i for i in range(len(X)) if not any(np.isnan(X[i])) and
+			np.sum(np.asarray([int(float(x)) for a in rownames[i,4:6] for x in a.split(',') ]))>covg_filter and
+			np.sum(np.asarray([int(float(x)) for a in rownames[i,6:8] for a in a.split(',') ]))>covg_filter
+			]
 	col_idx = range(X.shape[1])
 	X_use = X[idx, :]
 	X_use = X_use[:, col_idx]
@@ -275,14 +281,14 @@ def construct_data_from_h5(fn, covg_filter=20):
 	return {'X':X_use, 'Y':Y_use, 'rownames':rownames[idx,0]}
 
 
-def construct_training_data_from_label(label_fn, geneExp_fn, seqFeature_df, geneExp_absmax):
+def construct_training_data_from_label(label_fn, geneExp_fn, seqFeature_df, geneExp_absmax, ID='', in_training_phase=False):
 	if not os.path.isfile(label_fn):
 		raise Exception('this file is not found: %s'%label_fn)
 	if not os.path.isfile(geneExp_fn):
 		raise Exception('this file is not found: %s'%geneExp_fn)
 	# read in two sets of labelled events
 	# from the DARTS BHT-flat output
-	pos, neg = read_label_fn(label_fn)
+	pos, neg = read_label_fn(label_fn, in_training_phase)
 	pos_neg = pos + neg
 	# read in the gene expression for this
 	# comparison, and make it a matrix of
@@ -295,7 +301,10 @@ def construct_training_data_from_label(label_fn, geneExp_fn, seqFeature_df, gene
 	pos_neg_idx = [i for i in range(len(pos_neg)) if pos_neg[i] in seqFeature_df.index ]
 	X_use = np.concatenate([seqFeature, geneExp], axis=1)[pos_neg_idx]
 	Y_use = np.asarray([1.]*len(pos) + [0.]*len(neg))[pos_neg_idx]
-	rownames = np.asarray([ x for x in pos + neg ])[pos_neg_idx]
+	if ID:
+		rownames = np.asarray([ ID+'|'+x for x in pos + neg ])[pos_neg_idx]
+	else:
+		rownames = np.asarray([ x for x in pos + neg ])[pos_neg_idx]
 	colnames = np.concatenate([seqFeature_df.columns.values, geneExp_colnames], axis=0)
 	return {'X':X_use, 'Y':Y_use, 'colnames':colnames, 'rownames':rownames}
 
@@ -312,7 +321,7 @@ def read_sequence_feature(fn=None):
 	return data
 
 
-def read_label_fn(label_fn, significance=0.1, min_read_cov=20):
+def read_label_fn(label_fn, significance=0.1, min_read_cov=20, in_training_phase=False):
 	pos = set()
 	neg = set()
 	with open(label_fn, 'r') as f:
@@ -335,7 +344,7 @@ def read_label_fn(label_fn, significance=0.1, min_read_cov=20):
 				continue 
 			if post_pr > 1-significance:
 				pos.add(eid)
-			elif post_pr < significance and min(I1,S1)>2 and min(I2,S2)>2:
+			elif post_pr < significance and ( (not in_training_phase) or min(I1,S1)>2 and min(I2,S2)>2):
 				neg.add(eid)
 	return list(pos), list(neg)
 

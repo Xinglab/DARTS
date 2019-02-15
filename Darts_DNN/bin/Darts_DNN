@@ -110,11 +110,16 @@ def add_train_parser( subparsers ):
 	ag_train = subparsers.add_parser("train", help="Darts_DNN train: train a DNN model using Darts Framework from scratch")
 	
 	# input/output
-	ag_train.add_argument("-t", "--train-dir", dest="train_dir", nargs='+', type=str, required=True,
-		help="Folder path for all training data (in .h5 format), maximum from two folder; e.g. train_data/ENCODE train_data/Roadmap")
+	ag_train.add_argument("-t", "--train-filelist", dest="train_filelist", nargs='+', type=str, required=True,
+		help="Filepath for table containing all training data (feature matrix or label files, see online exmamples), maximum from two files; e.g. ENCODE.trainList.txt Roadmap.trainList.txt")
 	
 	ag_train.add_argument("-o", "--out-dir", dest="out_dir", type=str, required=True,
 		help="Output folder; saved model parameters will be 'best_val_model.h5'")	
+
+	ag_train.add_argument("-t", "--type", dest="event_type", type=str, required=False,
+		default='SE', choices=['SE', 'A5SS', 'A3SS', 'RI'],
+		help="Optional, default SE: specify the alternative splicing event type. SE: skipped exons, A3SS: alternative 3 splice sites, A5SS: alternative 5 splice sites, RI: retained introns")
+	
 	return
 
 

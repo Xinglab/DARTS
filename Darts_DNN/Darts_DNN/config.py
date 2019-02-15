@@ -20,10 +20,12 @@ def substitute_home_directory(d):
 			d[k] = os.path.join(os.path.expanduser('~'), d[k].lstrip('~/'))
 
 
-## Misc configurations
+## Predict and Build-feature configurations
 TRANS_TOTAL_NUM = 1498
 RBP_GENE_LIST_PATH = resource_filename('Darts_DNN.resources', 'rbp_gene_list.txt')
 T2G_FILE_PATH = resource_filename('Darts_DNN.resources', 'human_t2g.txt')
+
+## Train configurations
 
 
 ## DNN Model configurations
