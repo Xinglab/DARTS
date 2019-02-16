@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 """
 Darts_DNN - Darts_train
 read in data batch and train a dnn

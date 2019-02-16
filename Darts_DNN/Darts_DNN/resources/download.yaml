@@ -12,10 +12,10 @@ v0.1.0:
       md5sum: None
     A3SS:
       url: https://xinglab.cass.idre.ucla.edu/public/zijun/DARTS/v0.1.0/cisFeatures/A3SS.norm.txt.gz
-      md5sum: None
+      md5sum: None #0c06096b06c02dc298109fcbc1cc7f48
     A5SS:
       url: https://xinglab.cass.idre.ucla.edu/public/zijun/DARTS/v0.1.0/cisFeatures/A5SS.norm.txt.gz
-      md5sum: None
+      md5sum: bccae8b576e8142ea87ca791bcbb7e11
     RI:
       url: https://xinglab.cass.idre.ucla.edu/public/zijun/DARTS/v0.1.0/cisFeatures/RI.norm.txt.gz
-      md5sum: None
+      md5sum: 9ed8919672529fae7f56a4798cc19ce6

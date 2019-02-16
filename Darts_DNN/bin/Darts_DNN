@@ -1,12 +1,13 @@
+# -*- coding: UTF-8 -*-
 #!/usr/bin/env python
 
 
 """Deep-learning Augmented RNA-seq analysis of Transcript Splicing
 
-This is the main entry for Darts. 
+This is the main entry for Darts DNN. 
 
 Example:
-	$ Darts_DNN [train|predict|build_feature] <options>
+	$ Darts_DNN [train|predict|build_feature|get_data] <options>
 
 Authors:
 	Zijun Zhang <zj.z[at]ucla.edu>
@@ -16,16 +17,17 @@ Date:
 	Feb. 13, 2019
 """
 
-__author__ = 'Zijun Zhang'
-__version__ = '0.1.0'
-__email__ = 'zj.z@ucla.edu'
-
 
 import os
 import sys
 import logging
 import argparse as ap
 import datetime
+from Darts_DNN import config
+
+__author__ = 'Zijun Zhang'
+__version__ = config.CURRENT_VERSION
+__email__ = 'zj.z@ucla.edu'
 
 
 def main():
@@ -54,6 +56,9 @@ def main():
 		from Darts_DNN import Darts_build_feature
 		#print args
 		Darts_build_feature.parser( args )
+	elif subcommand == 'get_data':
+		from Darts_DNN import Darts_get_data
+		Darts_get_data.parser( args )
 
 def setup_logger():
 	"""Set up the logger for the whole pipeline
@@ -64,7 +69,7 @@ def setup_logger():
 	"""
 	# setup logger
 	logger = logging.getLogger('Darts_DNN')
-	logger.setLevel(logging.DEBUG)
+	logger.setLevel(logging.INFO)
 	# create file handler which logs even debug messages
 	fh = logging.FileHandler('log.Darts_DNN.txt')
 	fh.setLevel(logging.INFO)
@@ -103,6 +108,9 @@ def get_arg_parser():
 	# build_feature
 	add_build_feature_parser(subparsers)
 	
+	# get data
+	add_get_data_parser(subparsers)
+
 	return argparser
 
 
@@ -117,6 +125,24 @@ def add_train_parser( subparsers ):
 		help="Output folder; saved model parameters will be 'best_val_model.h5'")	
 
 	ag_train.add_argument("-t", "--type", dest="event_type", type=str, required=False,
+		default='SE', choices=['SE', 'A5SS', 'A3SS', 'RI'],
+		help="Optional, default SE: specify the alternative splicing event type. SE: skipped exons, A3SS: alternative 3 splice sites, A5SS: alternative 5 splice sites, RI: retained introns")
+	
+	return
+
+
+def add_get_data_parser( subparsers ):
+	ag_get_data = subparsers.add_parser("get_data", help="Darts_DNN get_data: connects online to get Darts_DNN data for the current version.")
+	
+	# input/output
+	ag_get_data.add_argument("-d", "--data", dest="data", nargs='+', type=str, required=True,
+		choices=list(config.CURRENT_AVAILABLE_DATA.keys()),
+		help="Available data for download")
+	
+	ag_get_data.add_argument("-o", "--out-dir", dest="out_dir", type=str, required=True,
+		help="Output folder for downloaded data")	
+
+	ag_get_data.add_argument("-t", "--type", dest="event_type", type=str, required=False,
 		default='SE', choices=['SE', 'A5SS', 'A3SS', 'RI'],
 		help="Optional, default SE: specify the alternative splicing event type. SE: skipped exons, A3SS: alternative 3 splice sites, A5SS: alternative 5 splice sites, RI: retained introns")
 	

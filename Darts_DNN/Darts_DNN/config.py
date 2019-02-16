@@ -28,6 +28,10 @@ T2G_FILE_PATH = resource_filename('Darts_DNN.resources', 'human_t2g.txt')
 ## Train configurations
 MAX_TRAIN_PATIENCE = 50
 
+## Get_data configuations
+DOWNLOAD_CONFIG = yaml.safe_load(open( resource_filename('Darts_DNN.resources', 'download.yaml'), 'r'))
+CURRENT_AVAILABLE_DATA = DOWNLOAD_CONFIG[CURRENT_VERSION]
+
 ## DNN Model configurations
 ARCH_CONFIG = yaml.safe_load(open( resource_filename('Darts_DNN.resources', 'architecture.yaml') ,'r'))
 # for future versions, enable 'softlinks' by just providing a string
