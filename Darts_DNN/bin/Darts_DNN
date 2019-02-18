@@ -9,9 +9,8 @@ This is the main entry for Darts DNN.
 Example:
 	$ Darts_DNN [train|predict|build_feature|get_data] <options>
 
-Authors:
+Author:
 	Zijun Zhang <zj.z[at]ucla.edu>
-	Yi Xing <yxing[at]ucla.edu>
 
 Date:
 	Feb. 13, 2019
@@ -139,12 +138,15 @@ def add_get_data_parser( subparsers ):
 		choices=list(config.CURRENT_AVAILABLE_DATA.keys()),
 		help="Available data for download")
 	
-	ag_get_data.add_argument("-o", "--out-dir", dest="out_dir", type=str, required=True,
-		help="Output folder for downloaded data")	
+	ag_get_data.add_argument("-o", "--out-dir", dest="out_dir", type=str, required=False,
+		help="Optional, default user home directory: Output folder for downloaded data")	
 
 	ag_get_data.add_argument("-t", "--type", dest="event_type", type=str, required=False,
 		default='SE', choices=['SE', 'A5SS', 'A3SS', 'RI'],
 		help="Optional, default SE: specify the alternative splicing event type. SE: skipped exons, A3SS: alternative 3 splice sites, A5SS: alternative 5 splice sites, RI: retained introns")
+
+	ag_get_data.add_argument("--specified-version", dest="sp", type=str, required=False, default=config.CURRENT_VERSION,
+		help="Optional, default current version: specified a Darts_DNN version for checking data availability")	
 	
 	return
 
@@ -163,7 +165,7 @@ def add_pred_parser( subparsers ):
 	ag_pred.add_argument("-e", "--expression", dest="expr", nargs='+', type=str, required=False,
 		help="Optional, required if input is Darts_BHT output; Folder path for Kallisto expression files; e.g '-e Ctrl_rep1,Ctrl_rep2 KD_rep1,KD_rep2'")
 	ag_pred.add_argument("-m", "--model", dest="model", type=str, required=False,
-		help="Optional: Filepath for a specific model file")
+		help="Optional, default using current version model in user home directory: Filepath for a specific model parameter file")
 	return
 
 
