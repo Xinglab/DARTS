@@ -40,9 +40,9 @@ def parser(args):
 		output_list = output_list if isinstance(output_list, list) else [output_list]
 		for url, md5, outfn in zip(url_list, md5_list, output_list):
 			md5 = None if md5=='None' else md5
-			if outdir:
+			if outdir or outfn == 'None':
 				basename = os.path.basename(url)
-				outfn = os.path.join(outdir, basename)
+				outfn = os.path.join(outdir, basename) if outdir else os.path.join('.', basename)
 			if outfn.startswith('~/'):
 				outfn = os.path.join(os.path.expanduser('~'), outfn.lstrip('~/'))
 			if not os.path.isdir(os.path.dirname(outfn)):

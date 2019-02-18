@@ -1,6 +1,6 @@
 # Readme for Darts_DNN
 ### Author: "Zijun Zhang"
-### Date: "3.17.2018"
+### Date: "2.17.2019"
 
 ### Table of Contents
 - [Installation](#installation)
@@ -14,29 +14,28 @@ To install `Darts_DNN` python package, navigate to this folder, then type
 > make install
 ```
 
-The `Makefile` will also connect to the Internet to download the latest exon cis- feature set as well as
-the trained parameter data files. Currently, these files will be released upon paper publication or by request.
-
 There are a few Deep-learning packages that `Darts_DNN` requires, including
-the popular interfaces [Keras](#), [Theano](#). 
+the popular high-level interface [Keras](#). 
 
 To test whether you have successfully installed `Darts_DNN`, type the following command in your shell:
 
 ```
-> Darts_DNN -h
-usage: Darts_DNN [-h] [--version] {train,predict,build_feature} ...
+> Darts_DNN -
+usage: Darts_DNN [-h] [--version] {train,predict,build_feature,get_data} ...
 
 Darts_DNN -- DARTS - Deep-learning Augmented RNA-seq analysis of Transcript
 Splicing
 
 positional arguments:
-  {train,predict,build_feature}
+  {train,predict,build_feature,get_data}
     train               Darts_DNN train: train a DNN model using Darts
                         Framework from scratch
     predict             Darts_DNN predict: make predictions on a built feature
                         sets in h5 format
     build_feature       Darts_DNN build_feature: build feature file given
                         required information
+    get_data            Darts_DNN get_data: connects online to get Darts_DNN
+                        data for the current version.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -90,7 +89,5 @@ You can train your own `Darts_DNN` model from scratch by first building a set a 
 the `train` subcommand in `Darts_DNN` package:
 
 ```
-> Darts_DNN train -i /some/path/to/train/folder -o /some/path/to/output/folder
+> Darts_DNN train -i /some/path/to/trainListFile -o /some/path/to/output/folder
 ```
-
-The training data of ENCODE and Roadmap will be released upon paper publication.

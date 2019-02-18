@@ -15,7 +15,7 @@ v0.0.1:
     SE:
       url: 
         [
-          "https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.0.1/trainedParam/SE-trainedParam-encode_plus_roadmap.h5", 
+          "https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.0.1/trainedParam/SE-trainedParam-encode_plus_roadmap.h5",
           "https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.0.1/trainedParam/SE-trainedParam-encode_only.h5",
           "https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.0.1/trainedParam/SE-trainedParam-roadmap_only.h5"
         ]
@@ -57,6 +57,18 @@ v0.1.0:
       url: https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.1.0/transFeature/rbp_max.tsv
       md5sum: e9f11d7356d24bb86007b051c0d28d11
       output: ~/.darts/DNN/v0.1.0/transFeature/rbp_max.tsv
+    A3SS:
+      url: https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.1.0/transFeature/rbp_max.tsv
+      md5sum: e9f11d7356d24bb86007b051c0d28d11
+      output: ~/.darts/DNN/v0.1.0/transFeature/rbp_max.tsv
+    A5SS:
+      url: https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.1.0/transFeature/rbp_max.tsv
+      md5sum: e9f11d7356d24bb86007b051c0d28d11
+      output: ~/.darts/DNN/v0.1.0/transFeature/rbp_max.tsv
+    RI:
+      url: https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.1.0/transFeature/rbp_max.tsv
+      md5sum: e9f11d7356d24bb86007b051c0d28d11
+      output: ~/.darts/DNN/v0.1.0/transFeature/rbp_max.tsv
 
   trainedParam:
     SE:
@@ -75,3 +87,39 @@ v0.1.0:
       url: https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.1.0/trainedParam/RI-trainedParam-EncodeRoadmap.h5
       md5sum: ca6e92aa69a963d762f65616d4a9e0ec
       output: ~/.darts/DNN/v0.1.0/trainedParam/RI-trainedParam-EncodeRoadmap.h5
+
+  trainingDataSet:
+    SE:
+      url: https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.1.0/trainingDataSet/SE.trainSet.tgz
+      md5sum: 2a8fffc0bb48c8114e6f71b8414ad229
+      output: None
+    A3SS:
+      url: https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.1.0/trainingDataSet/A3SS.trainSet.tgz
+      md5sum: be7c65a2afe809f415fbac447977072e
+      output: None
+    A5SS:
+      url: https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.1.0/trainingDataSet/A5SS.trainSet.tgz
+      md5sum: ce9cffd44de9a9dbb49de56850c14943
+      output: None
+    RI:
+      url: https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.1.0/trainingDataSet/RI.trainSet.tgz
+      md5sum: 6ea4671388ca0f169a0eb591a387a693
+      output: None
+
+  heldOutDataSet:
+    SE:
+      url: https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.1.0/heldOutDataSet/SE.heldOutSet.tgz
+      md5sum: e0026f786c9eaca48373e48845a7abff
+      output: None
+    A3SS:
+      url: https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.1.0/heldOutDataSet/A3SS.heldOutSet.tgz
+      md5sum: 5507fcb5fc27766b30e55736afa96828
+      output: None
+    A5SS:
+      url: https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.1.0/heldOutDataSet/A5SS.heldOutSet.tgz
+      md5sum: bfed3cc49513c05d50a570d02964e106
+      output: None
+    RI:
+      url: https://master.dl.sourceforge.net/project/rna-darts/resources/DNN/v0.1.0/heldOutDataSet/RI.heldOutSet.tgz
+      md5sum: 610216f11fdcdc15c3e91ecceed81fc1
+      output: None

@@ -1,22 +1,6 @@
 # -*- coding: UTF-8 -*-
 #!/usr/bin/env python
 
-
-"""Deep-learning Augmented RNA-seq analysis of Transcript Splicing
-
-This is the main entry for Darts DNN. 
-
-Example:
-	$ Darts_DNN [train|predict|build_feature|get_data] <options>
-
-Author:
-	Zijun Zhang <zj.z[at]ucla.edu>
-
-Date:
-	Feb. 13, 2019
-"""
-
-
 import os
 import sys
 import logging
@@ -30,13 +14,20 @@ __email__ = 'zj.z@ucla.edu'
 
 
 def main():
-	"""main entry for Darts
-	This function setup the logging and handle the input options
-	Args
-		None
-	Returns
-		None
-	"""
+	'''Deep-learning Augmented RNA-seq analysis of Transcript Splicing
+
+	This is the main entry for Darts DNN. 
+
+	Example:
+		$ Darts_DNN [train|predict|build_feature|get_data] <options>
+
+	Author:
+		Zijun Zhang <zj.z[at]ucla.edu>
+
+	Date:
+		Feb. 13, 2019
+	'''
+
 	logger = setup_logger()
 	argparser = get_arg_parser()
 	args = argparser.parse_args()

@@ -26,7 +26,7 @@ RBP_GENE_LIST_PATH = resource_filename('Darts_DNN.resources', 'rbp_gene_list.txt
 T2G_FILE_PATH = resource_filename('Darts_DNN.resources', 'human_t2g.txt')
 
 ## Train configurations
-MAX_TRAIN_PATIENCE = 50
+MAX_TRAIN_PATIENCE = 100
 
 ## Get_data configuations
 DOWNLOAD_CONFIG = yaml.safe_load(open( resource_filename('Darts_DNN.resources', 'download.yaml'), 'r'))

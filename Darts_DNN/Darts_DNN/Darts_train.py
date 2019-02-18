@@ -2,7 +2,7 @@
 
 """
 Darts_DNN - Darts_train
-read in data batch and train a dnn
+read in data batches and train a dnn
 
 # Zijun Zhang
 # 6.6.2017
