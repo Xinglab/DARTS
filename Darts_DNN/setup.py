@@ -36,7 +36,10 @@ def main():
 				'pyyaml',
 				'h5py',
 				'scikit-learn',
-				'scipy']
+				'scipy',
+				'tqdm>=4.14',
+				'pandas>=0.21',
+				'theano']
 		 )
 	return
 
