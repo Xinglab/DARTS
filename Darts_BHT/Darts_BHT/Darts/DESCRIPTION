@@ -1,7 +1,7 @@
 Package: Darts
 Type: Package
 Title: Deep learning Augmented Rna-seq analysis of Transcript Splicing
-Version: 0.1.2
+Version: 0.1.0
 Date: 2018-03-19
 Author: Zijun Zhang
 Maintainer: Zijun Zhang <zj.z@ucla.edu>
