@@ -10,8 +10,7 @@ import argparse as ap
 import datetime
 import shutil
 import tempfile
-import commands
-from subprocess import call
+from subprocess import call, check_output
 
 VERSION = 'v4.0.2'
 
@@ -55,13 +54,13 @@ def add_rmats_parser( subparsers ):
     parser.add_argument('--nthread', action='store', type=int, default=1,
                         help='The number of thread. The optimal number of thread should be equal to the number of CPU core.', dest='nthread')
 
-    parser.add_argument('--tstat', action='store', type=int, default=1,
-                        help='the number of thread for statistical model.', dest='tstat')
-    parser.add_argument('--cstat', action='store', type=float, default=0.0001,
-                        help='The cutoff splicing difference. The cutoff used in the null hypothesis test for differential splicing. The default is 0.0001 for 0.01%% difference. Valid: 0 ≤ cutoff < 1.', dest='cstat')
+    #parser.add_argument('--tstat', action='store', type=int, default=1,
+    #                    help='the number of thread for statistical model.', dest='tstat')
+    #parser.add_argument('--cstat', action='store', type=float, default=0.0001,
+    #                    help='The cutoff splicing difference. The cutoff used in the null hypothesis test for differential splicing. The default is 0.0001 for 0.01%% difference. Valid: 0 ≤ cutoff < 1.', dest='cstat')
 
-    parser.add_argument('--statoff', action='store_false',
-                        help='Turn statistical analysis off.', dest='stat')
+    #parser.add_argument('--statoff', action='store_false',
+    #                    help='Turn statistical analysis off.', dest='stat')
     return
 
 def process_parsed_rmats_args( args ):
@@ -102,6 +101,11 @@ def process_parsed_rmats_args( args ):
 
     dt_map = {'fr-unstranded':0, 'fr-firststrand':1, 'fr-secondstrand':2}
     args.dt = dt_map[args.dt]
+
+    # add back stat-related
+    args.tstat = 1
+    args.cstat = 0.00001
+    args.stat = True
     return args
 
 
@@ -127,7 +131,7 @@ def doSTARMapping(args): ## do STAR mapping
                 cmd += '--alignSJDBoverhangMin ' + str(args.tophatAnchor) + ' --alignIntronMax 299999 --genomeDir ' + args.bIndex + ' --sjdbGTFfile ' + args.gtf; 
                 cmd += ' --outFileNamePrefix ' + map_folder + '/ --readFilesIn ';
                 cmd += ' '.join(pair)
-                status,output = commands.getstatusoutput(cmd);
+                status, output = check_output(cmd, shell=True);
                 print("mapping sample_%d, %s is done with status %s" % (i, ' '.join(pair), status))
                 if (int(status)!=0): ## it did not go well
                     print("error in mapping sample_%d, %s: %s" % (i, ' '.join(pair),status))

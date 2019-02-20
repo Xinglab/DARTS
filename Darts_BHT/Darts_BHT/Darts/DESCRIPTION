@@ -12,5 +12,5 @@ Imports:
 	Rcpp,
 	doSNOW, 
 	getopt,
-	mixtools
+	mixtools,
 LinkingTo: Rcpp

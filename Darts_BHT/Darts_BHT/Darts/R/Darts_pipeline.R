@@ -10,9 +10,12 @@
 # revised 8.20.2017: added random_state for reproducibility
 # revised 3.19.2018: moved rescaling-related functions to `rescale_by_bias.R`
 # revised 3.19.2018: use new bias-estimates to rescale
+# revised 2.19.2019: modified interface of `Darts` and `Darts_replicate` for different AS types
+
+## TODO 2.20.2019: re-enable the res_dict in multi-threading
 
 
-Darts = function(in_fn, out_dir, C=0.05, rescale_meth=1, rho_fn=NA, verbose=1, random_state=777, thread=NULL)
+Darts = function(in_fn, out_fn, out_RData_fn=NULL, C=0.05, rescale_meth=1, rho_fn=NA, verbose=1, random_state=777, thread=NULL)
 {
 	if ( is.null(thread ) ) { thread = parallel::detectCores() }
 	cat("no. of threads using =", thread, '\n')
@@ -20,8 +23,8 @@ Darts = function(in_fn, out_dir, C=0.05, rescale_meth=1, rho_fn=NA, verbose=1, r
 	cl = makeSOCKcluster(thread)
 	registerDoSNOW(cl)
 
-	out_fn = file.path(out_dir, ifelse(is.na(rho_fn), 'darts_bht.flat.RData', 'dart_bht.info.RData'))
-	out_table_fn = file.path(out_dir, ifelse(is.na(rho_fn), 'darts_bht.flat.txt', 'dart_bht.info.txt'))
+	#out_fn = file.path(out_dir, ifelse(is.na(rho_fn), 'darts_bht.flat.RData', 'dart_bht.info.RData'))
+	#out_table_fn = file.path(out_dir, ifelse(is.na(rho_fn), 'darts_bht.flat.txt', 'dart_bht.info.txt'))
 	if(class(in_fn)=="character") {
 		data=read.table(in_fn, sep='\t', header=T)
 	} else if(class(in_fn)=="data.frame")
@@ -61,6 +64,8 @@ Darts = function(in_fn, out_dir, C=0.05, rescale_meth=1, rho_fn=NA, verbose=1, r
 	#for(i in 1:nrow(data))
 	mp.res = foreach(i=1:nrow(data), .packages='Darts', .options.snow=opts, .combine='rbind') %dopar%
 	{
+		if(verbose==2 && ! i%%200) cat(format(Sys.time(), "%c"), i,'/',nrow(data), '\n')
+		if(verbose==1) utils::setTxtProgressBar(pb,i)
 		id=data$ID[i]
 		I1=data$I1[i]
 		S1=data$S1[i]
@@ -90,9 +95,10 @@ Darts = function(in_fn, out_dir, C=0.05, rescale_meth=1, rho_fn=NA, verbose=1, r
 		#res$delta.mle[i] = I2/inc_len / (I2/inc_len + S2/skp_len) - I1/inc_len / (I1/inc_len + S1/skp_len)
 		this = data.frame( 
 			ID = id, 
-			mu.mle = I1/inc_len / (I1/inc_len + S1/skp_len),
-			delta.mle = I2/inc_len / (I2/inc_len + S2/skp_len) - I1/inc_len / (I1/inc_len + S1/skp_len),
-			post_pr = 1-post_cdf[right] + post_cdf[left],
+			psi1 = round( I1/inc_len / (I1/inc_len + S1/skp_len), 3),
+			psi2 = round( I2/inc_len / (I2/inc_len + S2/skp_len), 3),
+			delta.mle = round( I2/inc_len / (I2/inc_len + S2/skp_len) - I1/inc_len / (I1/inc_len + S1/skp_len), 4),
+			post_pr = round(1-post_cdf[right] + post_cdf[left], 4),
 			stringsAsFactors=F
 			)
 		}
@@ -100,14 +106,14 @@ Darts = function(in_fn, out_dir, C=0.05, rescale_meth=1, rho_fn=NA, verbose=1, r
 	}
 	close(pb)
 	res = merge(res, mp.res, by='ID')
-	save(res, file=out_fn)
-	write.table(res, file=out_table_fn, quote=F, row.names=F, sep='\t')
+	#if(!is.null(out_RData_fn)) save(res_dict, file=out_RData_fn)
+	write.table(res, file=out_fn, quote=F, row.names=F, sep='\t')
 	stopCluster(cl)
 	return(0)
 }
 
 
-Darts_replicate = function(in_fn, out_dir, rescale_meth=1, C=0.05, rho_fn=NA, 
+Darts_replicate = function(in_fn, out_fn, out_RData_fn=NULL, rescale_meth=1, C=0.05, rho_fn=NA, 
 	estim_groupVar_prior=TRUE, is_paired=FALSE, pooling=FALSE, verbose=1, random_state=777, thread=NULL)
 {
 	if ( is.null(thread ) ) { thread = parallel::detectCores() }
@@ -116,8 +122,8 @@ Darts_replicate = function(in_fn, out_dir, rescale_meth=1, C=0.05, rho_fn=NA,
 	cl = makeSOCKcluster(thread)
 	registerDoSNOW(cl)
 
-	out_fn = file.path(out_dir, ifelse(is.na(rho_fn), 'dart_bht.flat.RData', 'darts_bht.info.RData'))
-	out_table_fn = file.path(out_dir, ifelse(is.na(rho_fn), 'dart_bht.flat.txt', 'dart_bht.info.txt'))
+	#out_fn = file.path(out_dir, ifelse(is.na(rho_fn), 'dart_bht.flat.RData', 'darts_bht.info.RData'))
+	#out_table_fn = file.path(out_dir, ifelse(is.na(rho_fn), 'dart_bht.flat.txt', 'dart_bht.info.txt'))
 	if(class(in_fn)=="character") {
 		data=read.table(in_fn, sep='\t', header=T, stringsAsFactors=F)
 	} else if(class(in_fn)=="data.frame")
@@ -145,7 +151,7 @@ Darts_replicate = function(in_fn, out_dir, rescale_meth=1, C=0.05, rho_fn=NA,
 	delta_quantiles = seq(-0.99, 0.99, 0.01)
 	delta_quantiles = as.vector(delta_quantiles)
 	res_dict = matrix(NA, nrow=nrow(data), ncol=length(delta_quantiles))
-	rownames(res_dict) = data$exon_id
+	rownames(res_dict) = data[,1]
 	
 	if(estim_groupVar_prior) {
 		prior_fit = estim_group_var.prior_fit(data)
@@ -197,7 +203,6 @@ Darts_replicate = function(in_fn, out_dir, rescale_meth=1, C=0.05, rho_fn=NA,
 				# res$S1[i] = this_data$S1
 				# res$S2[i] = this_data$S2
 			}
-			this
 		} else {
 			is_healthy = check_data_sanity_replicate(this_data)
 			if(! is_healthy) {
@@ -225,18 +230,30 @@ Darts_replicate = function(in_fn, out_dir, rescale_meth=1, C=0.05, rho_fn=NA,
 					I2.p = this_data$I2,
 					S2.p = this_data$S2,
 					rho = this_rho,
-					mu.mle = sum(I1)/inc_len / (sum(I1)/inc_len + sum(S1)/skp_len),
-					delta.mle = sum(I2)/inc_len / (sum(I2)/inc_len + sum(S2)/skp_len) - sum(I1)/inc_len / (sum(I1)/inc_len + sum(S1)/skp_len),
-					post_pr = 1-post_cdf[right] + post_cdf[left],
+					psi1 = round(sum(I1)/inc_len / (sum(I1)/inc_len + sum(S1)/skp_len), 3),
+					psi2 = round(sum(I2)/inc_len / (sum(I2)/inc_len + sum(S2)/skp_len), 3),
+					delta.mle = round( sum(I2)/inc_len / (sum(I2)/inc_len + sum(S2)/skp_len) - sum(I1)/inc_len / (sum(I1)/inc_len + sum(S1)/skp_len), 4),
+					post_pr = round(1-post_cdf[right] + post_cdf[left], 4),
 					stringsAsFactors=F
 					)
 			} else {
+				psi1 = paste( round(I1/inc_len / (I1/inc_len + S1/skp_len), 3), collapse=',')
+				psi2 = paste( round(I2/inc_len / (I2/inc_len + S2/skp_len), 3), collapse=',')
+				if(is_paired) {
+					mu.mle = mean( I1/inc_len / (I1/inc_len + S1/skp_len) )
+					delta.mle = mean( I2/inc_len / (I2/inc_len + S2/skp_len) ) - mean( I1/inc_len / (I1/inc_len + S1/skp_len) )
+				} else {
+					mu.mle = mean( I1/inc_len / (I1/inc_len + S1/skp_len) )
+					delta.mle = mean( I2/inc_len / (I2/inc_len + S2/skp_len) - I1/inc_len / (I1/inc_len + S1/skp_len) )
+				}
 				this = data.frame(
 					ID = id,
 					rho = this_rho,
-					mu.mle = mean( I1/inc_len / (I1/inc_len + S1/skp_len) ),
-					delta.mle = mean( I2/inc_len / (I2/inc_len + S2/skp_len) ) - mean( I1/inc_len / (I1/inc_len + S1/skp_len) ),
-					post_pr = 1-post_cdf[right] + post_cdf[left],
+					psi1 = psi1,
+					psi2 = psi2,
+					mu.mle = round(mu.mle, 4),
+					delta.mle = round(delta.mle, 4),
+					post_pr = round(1-post_cdf[right] + post_cdf[left], 4),
 					stringsAsFactors=F
 					)
 			}
@@ -244,10 +261,10 @@ Darts_replicate = function(in_fn, out_dir, rescale_meth=1, C=0.05, rho_fn=NA,
 		this
 	}
 	close(pb)
-	save(res_dict, file=out_fn)
+	#if(!is.null(out_RData_fn)) save(res_dict, file=out_RData_fn)
 	res = merge(res, mp.res, by='ID')
 	stopCluster(cl)
-	write.table(res, file=out_table_fn, quote=F, row.names=F, sep='\t')
+	write.table(res, file=out_fn, quote=F, row.names=F, sep='\t')
 	return(0)
 }
 
