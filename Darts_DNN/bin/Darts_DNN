@@ -28,25 +28,28 @@ __email__ = 'zj.z@ucla.edu'
 
 
 def main():
-	logger = setup_logger()
 	argparser = get_arg_parser()
 	args = argparser.parse_args()
 	
 	subcommand = args.subcommand
 	
 	if subcommand == 'train':
+		logger = setup_logger()
 		from Darts_DNN import Darts_train
 		Darts_train.parser( args )
 		
 	elif subcommand == 'predict':
+		logger = setup_logger()
 		from Darts_DNN import Darts_pred
 		Darts_pred.parser( args )
 	
 	elif subcommand == 'build_feature':
+		logger = setup_logger()
 		from Darts_DNN import Darts_build_feature
-		#print args
 		Darts_build_feature.parser( args )
+
 	elif subcommand == 'get_data':
+		logger = setup_logger()
 		from Darts_DNN import Darts_get_data
 		Darts_get_data.parser( args )
 

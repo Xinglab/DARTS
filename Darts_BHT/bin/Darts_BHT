@@ -43,15 +43,42 @@ def main():
 		run_pipe(args)
 		
 	elif subcommand == 'bayes_infer':
+		logger = setup_logger()
 		from Darts_BHT import BHT_wrapper
 		BHT_wrapper.parser( args )
 
 
+def setup_logger():
+	"""Set up the logger for the whole pipeline
+	Args
+		None
+	Returns
+		logger: logging object
+	"""
+	# setup logger
+	logger = logging.getLogger('Darts_BHT')
+	logger.setLevel(logging.INFO)
+	# create file handler which logs even debug messages
+	fh = logging.FileHandler('log.Darts_BHT.txt')
+	fh.setLevel(logging.INFO)
+	# create console handler with a higher log level
+	ch = logging.StreamHandler()
+	ch.setLevel(logging.DEBUG)
+	# create formatter and add it to the handlers
+	formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s -\n %(message)s')
+	fh.setFormatter(formatter)
+	ch.setFormatter(formatter)
+	# add the handlers to the logger
+	logger.addHandler(fh)
+	logger.addHandler(ch)
+	return logger
+
+
 def restricted_float(x):
-    x = float(x)
-    if x < 0.01 or x > 0.99:
-        raise ap.ArgumentTypeError("%r not in range [0.01, 0.99]"%(x,))
-    return x
+	x = float(x)
+	if x < 0.01 or x > 0.99:
+		raise ap.ArgumentTypeError("%r not in range [0.01, 0.99]"%(x,))
+	return x
 
 def get_arg_parser():
 	description = "%(prog)s -- DARTS - Deep-learning Augmented RNA-seq analysis of Transcript Splicing"

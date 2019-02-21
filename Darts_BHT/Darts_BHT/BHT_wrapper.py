@@ -2,11 +2,13 @@
 
 import os
 from .convert_rmats import read_rmats_counts, write_darts_counts_from_rmats
+import logging
 
 import rpy2.robjects as ro
 from rpy2.robjects.packages import importr
 Darts_BHT_Rcpp = importr("Darts")
 
+logger = logging.getLogger('Darts_BHT.bayes_infer')
 
 def run_darts_BHT_norep(in_fn, out_fn, out_RData_fn, cutoff, rescale_meth, rho_fn, verbose, thread):
 	frame = (in_fn,
@@ -77,7 +79,7 @@ def validate_count_file(fp, replicate_model):
 			if not all([x>1 for x in this_data_len]):
 				has_replicates = False
 			if replicate_model=="paired" and len(set(this_data_len))!=1:
-				print('detected un-paired data at line %s'%line)
+				logger.info('detected un-paired data at line %s'%line)
 	return has_replicates
 
 
@@ -89,23 +91,27 @@ def parser(args):
 	args.rescale_method = rescale_meth_map[args.rescale_method]
 	if not os.path.isdir(args.outdir):
 		os.makedirs(args.outdir)
-	count_fp = os.path.join(args.outdir, "{}.input.txt".format(args.event_type) )
+	validated_count_fp = os.path.join(args.outdir, "{}.input.txt".format(args.event_type) )
 
 	# parsing counts file
 	if args.rmats_count_fp:
 		if not os.path.isfile(args.rmats_count_fp):
 			raise Exception("input count file '%s' is not found"%in_fn)
 
+		logger.info('Coverting rMATS count to Darts format')
 		exon_dict, _ = read_rmats_counts(count_fp=args.rmats_count_fp, annot_fp=args.annot, event_type=args.event_type)
-		write_darts_counts_from_rmats(exon_dict, fn=os.path.join(args.outdir, count_fp))
+		write_darts_counts_from_rmats(exon_dict, fn=validated_count_fp)
 	elif args.darts_count_fp:
-		count_fp = args.darts_count_fp
+		validated_count_fp = args.darts_count_fp
+
+	logger.info('input count={}'.format(validated_count_fp))
+	logger.info('output dir={}'.format(args.outdir))
 
 	# auto-detect if has replicates
-	has_replicates = validate_count_file(count_fp, args.replicate_model)
+	has_replicates = validate_count_file(validated_count_fp, args.replicate_model)
 	
 	if not has_replicates and (args.estim_gVar or args.replicate_model!='none'):
-		print('detected input file has no replicates; your "replicate_model" or "estim_gVar" options will be ignored')
+		logger.info('detected input file has no replicates; your "replicate_model" or "estim_gVar" options will be ignored')
 	if has_replicates and args.replicate_model=="none":
 		args.replicate_model='unpaired'
 
@@ -115,9 +121,9 @@ def parser(args):
 	out_RData_fn = os.path.join(args.outdir, "{}.darts_bht.{}.RData".format(args.event_type, prior_suffix))
 	args.prior = ro.NA_Integer if not args.prior else args.prior
 	if has_replicates:
-		print('using replicate model, mode "{}"'.format( args.replicate_model ) )
+		logger.info('using replicate model, mode "{}"'.format( args.replicate_model ) )
 		run_darts_BHT_rep(
-			in_fn=count_fp,
+			in_fn=validated_count_fp,
 			out_fn=out_fn,
 			out_RData_fn=out_RData_fn,
 			cutoff=args.cutoff,
@@ -130,9 +136,9 @@ def parser(args):
 			thread=args.nthread
 			)
 	else:
-		print('using no-replicate model')
+		logger.info('using no-replicate model')
 		run_darts_BHT_norep(
-			in_fn=count_fp, 
+			in_fn=validated_count_fp, 
 			out_fn=out_fn,
 			out_RData_fn=out_RData_fn,
 			cutoff=args.cutoff, 
@@ -141,6 +147,6 @@ def parser(args):
 			verbose=args.verbose, 
 			thread=args.nthread)
 
-	## TODO: add beatify results in XLSX format module by integrating annotation file
+	## TODO: add module beatify results in XLSX format by integrating annotation file
 
 	return

@@ -21,8 +21,8 @@ def main():
 
 		scripts=['bin/Darts_BHT'],
 
-		install_requires=['rpy2',
-			'cython==0.27.0']
+		install_requires=['rpy2',]
+			#'cython==0.27.0']
 		 )
 
 	from rpy2.robjects.packages import importr
