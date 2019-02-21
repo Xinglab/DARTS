@@ -2,6 +2,7 @@
 
 import os
 from .convert_rmats import read_rmats_counts, write_darts_counts_from_rmats
+from . import pretty_writter
 import logging
 
 import rpy2.robjects as ro
@@ -147,6 +148,6 @@ def parser(args):
 			verbose=args.verbose, 
 			thread=args.nthread)
 
-	## TODO: add module beatify results in XLSX format by integrating annotation file
-
+	## add module beatify results in XLSX format by integrating annotation file
+	pretty_writter.write_xlsx(out_fn, args.annot, args.event_type)
 	return
