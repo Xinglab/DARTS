@@ -23,7 +23,6 @@ def main():
 
 		install_requires=['rpy2',
 			#'cython==0.27.0', # for compiling rmats-turbo
-			'pandas',	
 			]
 		 )
 

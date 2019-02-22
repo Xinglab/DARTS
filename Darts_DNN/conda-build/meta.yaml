@@ -6,7 +6,7 @@ source:
   path: ..
 
 build:
-  number: 0
+  number: 1
   script: python setup.py install
 
 requirements:
@@ -23,8 +23,22 @@ requirements:
     - theano
   run:
     - python=2.7
-
+    - keras
+    - numpy
+    - pyyaml
+    - h5py
+    - scikit-learn
+    - scipy
+    - tqdm>=4.14
+    - pandas>=0.21.0
+    - theano
 
 test:
   imports:
     - Darts_DNN
+  commands:
+    - Darts_DNN -h
+    - Darts_DNN train -h
+    - Darts_DNN predict -h
+    - Darts_DNN get_data -h
+    - Darts_DNN build_feature -h

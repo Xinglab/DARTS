@@ -6,7 +6,7 @@ source:
   path: ..
 
 build:
-  number: 0
+  number: 1
   script: python setup.py install
 
 requirements:
@@ -25,3 +25,9 @@ requirements:
 test:
   imports:
     - Darts_BHT.BHT_wrapper
+    - Darts_BHT.rmats_wrapper
+    - Darts_BHT.pretty_writter
+  commands:
+    - Darts_BHT -h
+    - Darts_BHT rmats_count -h
+    - Darts_BHT bayes_infer -h
