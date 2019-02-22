@@ -123,6 +123,7 @@ def train_dnn_classifier(event_type, train_filelist, odir='.'):
 		)
 	try:
 		clf.model.load_weights(os.path.join(odir,'.keras_model.h5'))
+		logger.info("found and loaded previous intermediate parameters")
 	except:
 		pass
 	# keep a testing data record 
@@ -184,7 +185,7 @@ def train_dnn_classifier(event_type, train_filelist, odir='.'):
 		if auroc > best_val_auc:
 			best_val_auc = auroc
 			patience = 0
-			clf.model.save(os.path.join(odir,'{}.h5'.format(event_type)))
+			clf.model.save(os.path.join(odir,'{}.trainedParam.h5'.format(event_type)))
 		else:
 			patience += 1
 			if patience > config.MAX_TRAIN_PATIENCE:

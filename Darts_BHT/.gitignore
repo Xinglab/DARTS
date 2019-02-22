@@ -1,3 +1,6 @@
+# ignore conda-build
+conda-build/*.bz2
+
 # R build related
 # # History files
 .Rhistory

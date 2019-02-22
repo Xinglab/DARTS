@@ -98,7 +98,8 @@ def parser(args):
 	if args.rmats_count_fp:
 		if not os.path.isfile(args.rmats_count_fp):
 			raise Exception("input count file '%s' is not found"%in_fn)
-
+		if not args.annot or not os.path.isfile(args.annot):
+			raise Exception("annotation file must be specified if using rmats count")
 		logger.info('Coverting rMATS count to Darts format')
 		exon_dict, _ = read_rmats_counts(count_fp=args.rmats_count_fp, annot_fp=args.annot, event_type=args.event_type)
 		write_darts_counts_from_rmats(exon_dict, fn=validated_count_fp)
