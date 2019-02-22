@@ -39,7 +39,8 @@ def main():
 				'scipy',
 				'tqdm>=4.14',
 				'pandas>=0.21.0',
-				'theano']
+				'theano',
+				'tables']
 		 )
 	return
 
