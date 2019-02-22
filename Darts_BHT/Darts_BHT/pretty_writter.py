@@ -6,7 +6,12 @@ ZZJ
 
 import os
 import pandas as pd
-from openpyxl import load_workbook
+try:
+	from openpyxl import load_workbook
+	has_openpyxl = True
+except:
+	has_openpyxl = False
+
 import logging
 
 logger = logging.getLogger('Darts_BHT.result_writter')
@@ -46,12 +51,14 @@ def write_xlsx(res_fp, annot_fp, event_type):
 	xlsx_df = xlsx_df.sort_values(by='Posterior', ascending=False)
 
 	## write excel file
-	if os.path.isfile(xlsx_fp):
+	if os.path.isfile(xlsx_fp) and has_openpyxl:
 		book = load_workbook(xlsx_fp)
 		add_sheet = True
 		logger.info('found previous results, appending a new sheet')
 	else:
 		add_sheet = False
+		if os.path.isfile(xlsx_fp):
+			logger.info('Overwrite Warning: found previous results, but openpyxl not available, will overwrite the file. Use "pip install openpyxl" to avoid this warning.')
 	logger.info('writting xlsx')
 	prior_type = 'flat' if 'flat' in os.path.basename(res_fp) else 'info'
 	writer = pd.ExcelWriter(xlsx_fp, engine='openpyxl')

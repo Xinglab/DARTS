@@ -149,16 +149,16 @@ def add_pred_parser( subparsers ):
 	ag_pred = subparsers.add_parser("predict", help="Darts_DNN predict: make predictions on a built feature sets in h5 format")
 	
 	# input/output
-	ag_pred.add_argument("-i", "--input", dest="input", type=str, required=True,
+	ag_pred.add_argument("-i", dest="input", type=str, required=True,
 		help="Input feature file (*.h5) or Darts_BHT output (*.txt)")
-	ag_pred.add_argument("-o", "--output", dest="output", type=str, required=True,
+	ag_pred.add_argument("-o", dest="output", type=str, required=True,
 		help="Output filename")
-	ag_pred.add_argument("-t", "--type", dest="event_type", type=str, required=False,
+	ag_pred.add_argument("-t", dest="event_type", type=str, required=False,
 		default='SE', choices=['SE', 'A5SS', 'A3SS', 'RI'],
 		help="Optional, default SE: specify the alternative splicing event type. SE: skipped exons, A3SS: alternative 3 splice sites, A5SS: alternative 5 splice sites, RI: retained introns")
-	ag_pred.add_argument("-e", "--expression", dest="expr", nargs='+', type=str, required=False,
+	ag_pred.add_argument("-e", dest="expr", nargs='+', type=str, required=False,
 		help="Optional, required if input is Darts_BHT output; Folder path for Kallisto expression files; e.g '-e Ctrl_rep1,Ctrl_rep2 KD_rep1,KD_rep2'")
-	ag_pred.add_argument("-m", "--model", dest="model", type=str, required=False,
+	ag_pred.add_argument("-m", dest="model", type=str, required=False,
 		help="Optional, default using current version model in user home directory: Filepath for a specific model parameter file")
 	return
 

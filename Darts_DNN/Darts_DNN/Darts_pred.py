@@ -16,7 +16,7 @@ Below is original file header:
 # revised 2.16.2018: changed to python package
 """
 
-
+import sys
 import warnings  ## to filter warnings caused by Keras backward compatibility
 warnings.filterwarnings('ignore')
 
@@ -75,6 +75,9 @@ def parser(args):
 	if input_fn.endswith('h5'):
 		data = construct_data_from_h5(input_fn, covg_filter=0)
 	else:
+		if not args.expr:
+			logger.info('when input is a .txt label file, must set the expression file(s) by "-e" options. ')
+			sys.exit(0)
 		logger.info('reading cis and trans feaures for type %s'%args.event_type)
 		if len(args.expr) == 2:
 			kallisto_1 = args.expr[0].split(',')

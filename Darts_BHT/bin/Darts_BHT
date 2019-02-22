@@ -108,7 +108,7 @@ def add_infer_parser( subparsers ):
 	infer_input.add_argument("--darts-count", dest="darts_count_fp", type=str, 
 		help="Darts count file as input")
 	
-	ag_infer.add_argument("-o", dest="outdir", type=str, required=True,
+	ag_infer.add_argument("--od", dest="outdir", type=str, required=True,
 		help="Output folder for BHT inference, results will be [event_type].darts_bht.[flat|info].txt")
 
 	ag_infer.add_argument("--annot", dest="annot", type=str, required=True,

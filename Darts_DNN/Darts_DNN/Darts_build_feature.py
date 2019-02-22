@@ -19,14 +19,7 @@ logger = logging.getLogger('Darts_DNN.build_feature')
 from . import Darts_rbpTable as _Darts_rbp
 from . import Darts_tx2g as _Darts_tx2g
 from . import config
-
-
-def read_sequence_feature(fn):
-	if not os.path.isfile(fn):
-		raise Exception('cis feature file not found: %s'%fn)
-	data=pd.read_hdf(fn)
-	return data
-
+from .utils import read_sequence_feature
 
 def read_sp_out(sp_fn, sig_only=False):
 	if not os.path.isfile(sp_fn):
@@ -85,7 +78,7 @@ def RBPexp_normalizer(rbp_exp_vec, event_type):
 	return rbp_exp_vec
 
 
-def make_single_table(darts_flat_fn, cis_feature_fn, outdir, outfn, event_type):
+def make_single_table(darts_flat_fn, cis_feature_fn, rbp_fn, outfn, event_type):
 	
 	#### read in darts-flat output ####
 	print(".. read darts-flat output")
@@ -93,9 +86,9 @@ def make_single_table(darts_flat_fn, cis_feature_fn, outdir, outfn, event_type):
 	
 	#### read in rbp exp ####
 	print(".. read rbp exp")
-	rbp_txt = [x for x in os.listdir(outdir) if 'RBP_tpm' in x]
-	if len(rbp_txt)>1: print("warning: more than one RBP_tpm detected in folder; only the first one is used.")
-	rbp_fn = os.path.join(outdir,rbp_txt[0])
+	#rbp_txt = [x for x in os.listdir(outdir) if 'RBP_tpm' in x]
+	#if len(rbp_txt)>1: print("warning: more than one RBP_tpm detected in folder; only the first one is used.")
+	#rbp_fn = os.path.join(outdir,rbp_txt[0])
 	print(rbp_fn)
 	colnames, rbp_exp_vec = read_rbp_exp(rbp_fn)
 	rbp_exp_vec = RBPexp_normalizer(rbp_exp_vec, event_type)
@@ -133,9 +126,6 @@ def make_single_table(darts_flat_fn, cis_feature_fn, outdir, outfn, event_type):
 
 def parser( args ):
 	# receive user arguments
-	assert len(args.expr)==2
-	kallisto_1 = args.expr[0].split(',')
-	kallisto_2 = args.expr[1].split(',')
 	if args.cis is None:
 		cis = config.CURRENT_CIS_PATH[args.event_type]
 	else:
@@ -144,18 +134,24 @@ def parser( args ):
 	outdir = os.path.dirname(os.path.realpath(outfn))
 	darts_flat_fn = args.input
 	
-	# convert kallisto transcript to gene
-	logger.info('convert tx to gene TPM')
-	for kal_dir in kallisto_1 + kallisto_2:
-		_Darts_tx2g.parser(kal_dir)
-	
-	# extract RBP from gene
-	logger.info('extract RBP')
-	_Darts_rbp.parser(outdir, 
-		[os.path.join(x,'gene_tpm.tsv') for x in kallisto_1],
-		[os.path.join(x,'gene_tpm.tsv') for x in kallisto_2])
+	# process the RBPs	
+	if len(args.expr)==2:
+		kallisto_1 = args.expr[0].split(',')
+		kallisto_2 = args.expr[1].split(',')
+		# convert kallisto transcript to gene
+		logger.info('convert tx to gene TPM')
+		for kal_dir in kallisto_1 + kallisto_2:
+			_Darts_tx2g.parser(kal_dir)
+		# extract RBP from gene
+		logger.info('extract RBP')
+		_Darts_rbp.parser(outdir, 
+			[os.path.join(x,'gene_tpm.tsv') for x in kallisto_1],
+			[os.path.join(x,'gene_tpm.tsv') for x in kallisto_2])
+		rbp_fn = os.path.join(outdir, 'RBP_tpm.txt')
+	else:
+		rbp_fn = args.expr[0]
 	
 	# make the h5 store
 	logger.info('make h5 feature table')
 	event_type = args.event_type
-	make_single_table(darts_flat_fn, cis, outdir, outfn, event_type)
+	make_single_table(darts_flat_fn, cis, rbp_fn, outfn, event_type)

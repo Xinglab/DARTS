@@ -37,8 +37,8 @@ def main():
 				'h5py',
 				'scikit-learn',
 				'scipy',
-				#'tqdm>=4.14',
-				#'pandas>=0.21.0',
+				'tqdm>=4.14',
+				'pandas>=0.21.0',
 				'theano']
 		 )
 	return

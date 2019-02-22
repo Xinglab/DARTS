@@ -149,5 +149,6 @@ def parser(args):
 			thread=args.nthread)
 
 	## add module beatify results in XLSX format by integrating annotation file
-	pretty_writter.write_xlsx(out_fn, args.annot, args.event_type)
+	if args.annot:
+		pretty_writter.write_xlsx(out_fn, args.annot, args.event_type)
 	return

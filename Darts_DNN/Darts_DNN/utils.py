@@ -270,10 +270,7 @@ def construct_data_from_h5(fn, covg_filter=20, in_training_phase=False):
 			)
 			]
 	else:
-		idx = [i for i in range(len(X)) if not any(np.isnan(X[i])) and
-			np.sum(np.asarray([int(float(x)) for a in rownames[i,4:6] for x in a.split(',') ]))>covg_filter and
-			np.sum(np.asarray([int(float(x)) for a in rownames[i,6:8] for a in a.split(',') ]))>covg_filter
-			]
+		idx = [i for i in range(len(X)) if not any(np.isnan(X[i])) 	]
 	col_idx = range(X.shape[1])
 	X_use = X[idx, :]
 	X_use = X_use[:, col_idx]
