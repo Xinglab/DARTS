@@ -283,27 +283,38 @@ def construct_training_data_from_label(label_fn, geneExp_fn, seqFeature_df, gene
 		raise Exception('this file is not found: %s'%label_fn)
 	if not os.path.isfile(geneExp_fn):
 		raise Exception('this file is not found: %s'%geneExp_fn)
+
 	# read in two sets of labelled events
 	# from the DARTS BHT-flat output
-	pos, neg = read_label_fn(label_fn, in_training_phase=in_training_phase)
-	#print('in construct, pos='+str(len(pos)))
-	#print('in construct, neg='+str(len(neg)))
-	pos_neg = pos + neg
+	pos, neg, inconclusive = read_label_fn(label_fn, in_training_phase=in_training_phase)
+	pos_eid = list(pos.keys())
+	neg_eid = list(neg.keys())
+	incl_eid = list(inconclusive.keys())
+	if in_training_phase: # in train mode, only use high-confidence labels
+		eid_list = pos_eid + neg_eid
+	else:
+		eid_list = pos_eid + neg_eid + incl_eid
+
 	# read in the gene expression for this
 	# comparison, and make it a matrix of
 	# len(pos)+len(neg) rows
-	geneExp, geneExp_colnames = read_geneExp(geneExp_fn, geneExp_absmax, nrow=len(pos)+len(neg) )
+	geneExp, geneExp_colnames = read_geneExp(geneExp_fn, geneExp_absmax, nrow=len(eid_list) )
+
 	# extract  seqfeatures
-	seqFeature = seqFeature_df.loc[pos+neg]
-	assert seqFeature.shape[0] == len(pos) + len(neg)	
+	seqFeature = seqFeature_df.loc[eid_list]
+	assert seqFeature.shape[0] == len(eid_list)
+
 	# concat
-	pos_neg_idx = [i for i in range(len(pos_neg)) if pos_neg[i] in seqFeature_df.index ]
-	X_use = np.concatenate([seqFeature, geneExp], axis=1)[pos_neg_idx]
-	Y_use = np.asarray([1.]*len(pos) + [0.]*len(neg))[pos_neg_idx]
-	if ID:
-		rownames = np.asarray([ ID+'|'+x for x in pos + neg ])[pos_neg_idx]
+	eid_idx = [i for i in range(len(eid_list)) if eid_list[i] in seqFeature_df.index ]
+	X_use = np.concatenate([seqFeature, geneExp], axis=1)[eid_idx]
+	if in_training_phase:
+		Y_use = np.asarray([1.]*len(pos_eid) + [0.]*len(neg_eid))[eid_idx]
 	else:
-		rownames = np.asarray([ x for x in pos + neg ])[pos_neg_idx]
+		Y_use = np.asarray([pos[eid] for eid in pos_eid] + [neg[eid] for eid in neg_eid] + [inconclusive[eid] for eid in incl_eid])[eid_idx]
+	if ID:
+		rownames = np.asarray([ ID+'|'+x for x in eid_list ])[eid_idx]
+	else:
+		rownames = np.asarray([ x for x in eid_list ])[eid_idx]
 	colnames = np.concatenate([seqFeature_df.columns.values, geneExp_colnames], axis=0)
 	return {'X':X_use, 'Y':Y_use, 'colnames':colnames, 'rownames':rownames}
 
@@ -321,8 +332,9 @@ def read_sequence_feature(fn=None):
 
 
 def read_label_fn(label_fn, significance=0.1, min_read_cov=20, in_training_phase=False):
-	pos = set()
-	neg = set()
+	pos = {}
+	neg = {}
+	inconclusive = {}
 	with open(label_fn, 'r') as f:
 		firstline = True
 		for line in f:
@@ -339,13 +351,21 @@ def read_label_fn(label_fn, significance=0.1, min_read_cov=20, in_training_phase
 			I2 = sum([int(x) for x in ele[header['I2']].split(',') ])
 			S1 = sum([int(x) for x in ele[header['S1']].split(',') ])
 			S2 = sum([int(x) for x in ele[header['S2']].split(',') ])
-			if I1+S1 <= min_read_cov or I2+S2 <= min_read_cov:
-				continue 
-			if post_pr > 1-significance:
-				pos.add(eid)
-			elif post_pr < significance and ( (not in_training_phase) or min(I1,S1)>2 and min(I2,S2)>2):
-				neg.add(eid)
-	return list(pos), list(neg)
+			if in_training_phase:
+				if I1+S1 <= min_read_cov or I2+S2 <= min_read_cov:
+					continue 
+				if post_pr > 1-significance:
+					pos[eid] = post_pr
+				elif post_pr < significance and ( (not in_training_phase) or min(I1,S1)>2 and min(I2,S2)>2):
+					neg[eid] = post_pr
+			else:
+				if post_pr > 1-significance:
+					pos[eid] = post_pr
+				elif post_pr < significance:
+					neg[eid] = post_pr
+				else:
+					inconclusive[eid] = post_pr
+	return pos, neg, inconclusive
 
 
 def read_label_fn_ad_hoc(label_fn, significance=0.1, min_read_cov=20):
