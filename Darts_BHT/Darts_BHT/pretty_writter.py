@@ -1,7 +1,10 @@
-'''use pandas to store Darts_BHT output
-from text to xlsx
-ZZJ
-2.20.2019
+# -*- coding: utf-8 -*-
+
+'''Use pandas to store Darts_BHT output
+from text to xlsx. If `openpyxl` is available, 
+then append new sheets to existing xlsx file, making one "Darts_BHT.results.xlsx"
+with multiple sheets, each sheet for a splicing event type;
+otherwise, the existing xlsx file will be overwrite.
 '''
 
 import os

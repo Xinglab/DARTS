@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-'''Transferred parser code from rmats-turbo
+'''Transferred parser code from rMATS-turbo (v4.0.2). 
+
+This version of rMATS-turbo was compiled using Python 2.7 and Cython 0.27, with unicode UCS4.
+
+If you encounter errors in importing the `rmatspipeline.so` module, please refer to
+the rMATS user guide page at http://rnaseq-mats.sourceforge.net/user_guide.htm
 '''
 
 import os
