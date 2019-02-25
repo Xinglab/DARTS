@@ -2,15 +2,11 @@
 
 """
 Darts_DNN - tx2g
+
 Mapping kallisto transcript TPM to Gene
 
-TODO: parse a GTF file for mapping
-	IDs in the future
-
-# convert kallisto tpm to rsem
-# Zijun Zhang
-# 7.3.2017
-# revised 11.12.2017: changed to snakemake
+TODO: 
+	parse a GTF file for mapping IDs in the future
 """
 
 import sys

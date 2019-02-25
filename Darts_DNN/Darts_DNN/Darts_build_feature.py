@@ -1,10 +1,9 @@
+# -*- coding: UTF-8 -*-
+
 """
 Darts_DNN - Darts_build_feature
-# make the sequence and RBP features for a given comparison
-# Zijun Zhang
-# 6.16.2017
-# revised 7.1.2017: add a command-line argument parser
-# revised 8.7.2017: change to use kallisto est.
+
+make the sequence and RBP features for a given comparison
 """
 
 import os

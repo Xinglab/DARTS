@@ -2,13 +2,8 @@
 
 """
 Darts_DNN - Darts_train
-read in data batches and train a dnn
 
-# Zijun Zhang
-# 6.6.2017
-# revised 6.9.2017: returning two random targets at a time in `read_data_batch`
-# DEPRECATED as of 7.28: revised 7.25.2017: loosen filter on negative data and train a new model
-# revised 7.28.2017: adapt to use Kallisto TPM
+read in data batches and train a dnn
 """
 
 import warnings  ## to filter warnings caused by Keras backward compatibility

@@ -1,15 +1,7 @@
 """
 Darts_DNN - rbpTable
 
-# read in folder structure, prepare the data format,
-# and call Darts[Spider] to run on processed splicing data
-# Zijun Zhang
-# 5.18.2017
-# revised 7.1.2017: use only one replicate as downsampling
-# revised 7.2.2017: enable replicate-wise or merged one-click pipeline
-# revised 7.3.2017: remove replicate-wise, add random down-sampling
-# revised 8.30.2017: changed to Roadmap data
-# revised 11.12.2017: changed to snakemake package
+Utilities for reading and preparinig trans features from gene expression
 """
 import sys
 import os

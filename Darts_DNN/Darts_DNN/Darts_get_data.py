@@ -3,12 +3,13 @@
 """
 Darts_DNN - get_data
 
-date: Feb. 15, 2019
-author: ZZJ
-
 Implements an internal downloading module for 
 getting data from internet. Data includes training
 data, cis feature files, etc.
+
+This module depends on the url and md5sum stored in ``resources/download.yaml``
+
+
 """
 
 import os

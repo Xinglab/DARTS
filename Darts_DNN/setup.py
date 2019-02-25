@@ -31,15 +31,15 @@ def main():
 				'rbp_gene_list.txt',
 				'trained_model_param.yaml',
 				'trans_features.yaml']},
-		install_requires=['keras', 
-				'numpy',
-				'pyyaml',
-				'h5py',
-				'scikit-learn',
-				'scipy',
-				'tqdm>=4.14',
-				'pandas>=0.21.0',
-				'theano']
+		install_requires=[]#'keras', 
+				#'numpy',
+				#'pyyaml',
+				#'h5py',
+				#'scikit-learn',
+				#'scipy',
+				#'tqdm>=4.14',
+				#'pandas>=0.21.0',
+				#'theano']
 		 )
 	return
 

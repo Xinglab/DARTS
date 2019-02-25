@@ -1,6 +1,10 @@
+"""
 # sklearn-style neural net in keras
+
 # Zijun Zhang, 3/9/2017
+
 # revised 6.6.2017: add batch normalization options
+"""
 
 from keras.utils import np_utils
 from keras.models import Sequential, Model

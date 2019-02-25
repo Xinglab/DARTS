@@ -23,16 +23,19 @@ Date: "2.24.2019"
 ### Installation
 
 #### Install via Anaconda
-The recommended way to install `Darts_BHT` is through [Anaconda](https://anaconda.org/darts-comp-bio):
+The recommended way to install `Darts_BHT` is through [Anaconda](https://anaconda.org/darts-comp-bio).
+You can also create a new environment for Darts, because currently DARTS works in Python 2.7.
 
 ```bash
+conda create -n darts python=2.7  # optional
+source activate darts
 conda install -c darts-comp-bio darts_bht
 ```
 
 This will allow conda to do all the heavy-lifting and most often the easiest way to get things spinning.
 
-#### Compile the source R package
-To install `Darts_BHT` R package, simply browse to the BHT folder and
+#### Compile the source Rcpp package
+Alternatively, to install `Darts_BHT` R package, you can browse to the BHT folder and
 type the following command in terminal:
 ```
 cd Darts_BHT/
@@ -47,31 +50,36 @@ If finished successfully, you will see the following message
 * DONE (Darts)
 ```
 
-You should also add `Darts` suite to your environment variables, by
-adding the following line to your `.bash_profile` in `$HOME` directory:
-```
-export PATH=$HOME/.darts:$PATH
-```
-
-Now in your shell,  type
-```bash
-> Darts_BHT_STAT -h
-Usage: Darts_BHT [-[-input|i] <character>] [-[-rho|r] [<character>]] [-[-out|o] <character>] [-[-cutoff|c] [<double>]] [-[-rep|k] [<integer>]] [-[-pool|m] [<logical>]] [-[-estim_gVar|g] [<logical>]] [-[-verbose|v] [<integer>]] [-[-help|h]]
-    -i|--input         input file in Spider format (required)
-    -r|--rho           prior file in Spider format (optional, if none then flat prior i.e. rho=0.5)
-    -o|--out           output directory (required)
-    -c|--cutoff        Cutoff of Posterior probability, must be in (0,1) (optional, default=0.05)
-    -k|--rep           run replicate [pair/unpair] model (optional, 0:no replicate, 1:unpaired, 2:paired, default=0)
-    -m|--pool          merge the replicates, valid only when rep>0, default: FALSE
-    -g|--estim_gVar    Use prior to estimate within group variance, default: FALSE
-    -v|--verbose       verbose mode (optional, 0:non-verbose, 1:summary, 2:every 200, default=0)
-    -h|--help          print this help message and exit
-
-```
-
 ### Testing
 
 #### Testing the Python wrapper
+You can download the [testing_data](https://github.com/zj-zhang/DARTS-BleedingEdge/tree/doc/Darts_BHT/test_data) from the Github repo. If you installed through Anaconda, then type the following command and should
+see the corresponding help message as below:
+
+```bash
+> Darts_BHT -h
+usage: Darts_BHT [-h] [--version] {rmats_count,bayes_infer} ...
+
+Darts_BHT -- DARTS - Deep-learning Augmented RNA-seq analysis of Transcript Splicing
+
+positional arguments:
+  {rmats_count,bayes_infer}
+    rmats_count         Darts_BHT rmats_count: run rMATS-turbo to count
+                        junction reads in BAM files
+    bayes_infer         Dart_BHT bayes_infer: perform Bayesian hypothesis
+                        testing inference
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+
+For command line options of each sub-command, type: Darts_BHT COMMAND -h
+```
+
+You can test run the installed `Darts_BHT` by:
+```bash
+Darts_BHT bayes_infer --darts-count test_data/test_norep_data.txt --od test_data/
+```
 
 #### Testing the R package
 Now let's do a few quick checks to make sure the installed
