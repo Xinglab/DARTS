@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-'''Transferred parser code from rmats-turbo
+'''Transferred parser code from rMATS-turbo (v4.0.2). 
+
+This version of rMATS-turbo was compiled using Python 2.7 and Cython 0.27, with unicode UCS4.
+
+If you encounter errors in importing the `rmatspipeline.so` module, please refer to
+the rMATS user guide page at http://rnaseq-mats.sourceforge.net/user_guide.htm
 '''
 
 import os
@@ -76,11 +81,17 @@ def process_parsed_rmats_args( args ):
         exit(0)
 
     if len(args.b1) > 0:
-        with open(args.b1, 'r') as fp:
-            args.b1 = fp.read().strip(' ,\n')
+        if args.b1.endswith('.txt'):
+            with open(args.b1, 'r') as fp:
+                args.b1 = fp.read().strip(' ,\n')
+        else:
+            args.b1 = ','.join(args.b1)
     if len(args.b2) > 0:
-        with open(args.b2, 'r') as fp:
-            args.b2 = fp.read().strip(' ,\n')
+        if args.b2.endswith('.txt'):
+            with open(args.b2, 'r') as fp:
+                args.b2 = fp.read().strip(' ,\n')
+        else:
+            args.b2 = ','.join(args.b2)
     if len(args.s1) > 0:
         with open(args.s1, 'r') as fp:
             args.s1 = fp.read().strip(' ,\n')

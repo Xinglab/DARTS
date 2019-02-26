@@ -3,15 +3,6 @@
 '''
 Darts_DNN - utils
 training and prediction utilities
-
-Below is original header:
-# utilities for machine learning stuff
-# Zijun Zhang, 1.19.2017
-# last revised: 2.22.2017
-# revised 6.6.2017: reset random seed to None after split fold
-# revised 6.6.2017: fixed a bug in `split_data_fold` when auxillary arguments are provided
-# revised 6.7.2017: provide a proportion for minibatch construction in `construct_balanced_minibatch`
-# revised 6.7.2017: moved `split_imbalance_data` into utils
 '''
 
 import os
@@ -25,13 +16,18 @@ import scipy.stats
 from . import config
 
 def split_data_fold(X, Y, n_fold=5, fold_id=0, shuffle=True, random_seed=123, *args):
-	""" split data X, Y into n_fold and return one fold versue the rest
+	"""split data X, Y into n_fold and return one fold versue the rest
+	
+	Args:
 		X: numpy ndarray,
 		Y: list/numpy array
 		n_fold: total number of fold to split
 		fold_id: fold to be returned
 		shuffle: randomly re-order if turned on
-		*args: other axillary attributes to be split
+		args: other axillary attributes to be split
+	
+	Returns:
+		tuple: the splited X,y into target and remain
 	"""
 	assert fold_id < n_fold
 	random.seed(random_seed)
@@ -62,13 +58,18 @@ def split_data_fold(X, Y, n_fold=5, fold_id=0, shuffle=True, random_seed=123, *a
 
 
 def split_imbalance_data(X, Y, prop_test=0.1, random_seed=123456, *args):	
-	""" randomly choose the given proportion of positive labels out for testing, with 
-	    matching amount of negative labels
+	"""randomly choose the given proportion of positive labels out for testing, with 
+	matching amount of negative labels
+	
+	Args:
 		X: np-array, features
 		Y: np-array
 		prop_test: float, proportion of positive labels for testing
 		random_seed: int
-		*args: other axillary attributes to be split
+		args: other axillary attributes to be split
+	
+	Returns:
+		tuple: splitted data
 	"""
 	random.seed(random_seed)
 	r0_index = split_y_by_label(Y, 0)
@@ -104,11 +105,16 @@ def split_imbalance_data(X, Y, prop_test=0.1, random_seed=123456, *args):
 		
 	
 def split_data_tier(X, Y, R, T=2, percents=None, shuffle=True, verbose=True):
-	""" based on the median/percentile of R (auxillary factor),
-		split X and Y seperately for Y=0 and Y=1
+	"""based on the median/percentile of R (auxillary factor),
+	split X and Y seperately for Y=0 and Y=1
+	
+	Args:
 		X: numpy array
 		Y: list/numpy array
 		R: list/numpy array, auxillary factor
+	
+	Returns:
+		tuple: int index
 	"""
 	if percents is None: percents = np.concatenate([np.arange(0., 1., step=1./T)[1:],[1.]]) * 100.
 	R0_percentiles = np.percentile([R[i] for i in range(len(Y)) if Y[i]==0], percents)
@@ -131,11 +137,16 @@ def split_data_tier(X, Y, R, T=2, percents=None, shuffle=True, verbose=True):
 
 
 def construct_balanced_minibatch(index, R0_idx, R1_idx, batch_size, pos_prop=0.5, shuffle=True):
-	""" construct a mini-batch from R[01]_index to be balanced (50% 0, 50% 1)
+	"""construct a mini-batch from R[01]_index to be balanced (50% 0, 50% 1)
+	
+	Args:
 		index: int, index of mini-batch
 		R[01]_idx: a list/numpy array for the two classes
 		batch_size: int
 		pos_prot: float, the proportion of positive labels in a batch
+	
+	Returns:
+		int: list of shuffled index
 	"""
 	b1_size = int(batch_size*pos_prop)
 	b0_size = batch_size - b1_size
@@ -156,7 +167,14 @@ def construct_balanced_minibatch(index, R0_idx, R1_idx, batch_size, pos_prop=0.5
 
 def split_y_by_label(y, label):
 	""" a utility function to automatically 
-	find the indices of y for given a label
+	find the indices of binary-labeled y for given a label.
+
+	Args:
+		y (np.array): observed labels, could be 0/1 or +1/-1
+		label (int): label to extract, must be 0 or 1
+
+	Returns:
+		list(int): the indices for the given label
 	"""
 	unique_labels = np.unique(y)
 	if np.min(unique_labels)==-1: label = label*2-1
@@ -169,8 +187,26 @@ def split_y_by_label(y, label):
 def train_keras_balanced_model(model, x_train, y_train, x_val, y_val, 
 		sample_weight=None, n_epoch=100, batch_size=64, minibatch_pos_prop=0.5, 
 		save_model_name='my_model.h5', metric_to_use='roc'):
-	""" train keras model by `train_on_batch` while using the user-defined
+	"""train keras model by ``Keras.Model.train_on_batch`` while using the user-defined
 	biased-proportion of minibatches and custom early-stop surveillance
+
+	This is the workhorse for training Darts DNN model.
+
+	Args:
+		model (keras.Model): the defined keras model to be trained
+		x_train (np.array): features for train set
+		y_train (np.array): labels for train set
+		x_val (np.array): features for validation set
+		y_val (np.array): labels for validation set
+		sample_weight (np.array): customize sample weight in training loss function; default is ``None``
+		n_epoch (int): max number of epochs of training
+		batch_size (int): training mini-batch size
+		minibatch_pos_prop (float): the proporation of positive labels in each mini-batch
+		save_model_name (str): filename for saving best model
+		metric_to_use (str): the metric to use for monitoring early stopping; choices are ['roc', 'pr', 'acc', 'loss']
+
+	Returns:
+		float: best validation auc
 	"""
 	r0_index = split_y_by_label(y_train, 0)
 	r1_index = split_y_by_label(y_train, 1)
@@ -251,6 +287,16 @@ def train_keras_balanced_model(model, x_train, y_train, x_val, y_val,
 
 
 def construct_data_from_h5(fn, covg_filter=20, in_training_phase=False):
+	"""Read inn a feature file from .h5 disk file
+
+	Args:
+		fn (str): filepath to .h5 feature file; could be built by ``Darts_DNN build_feature``
+		covg_filter (int): the minimum coverage for the event to be considered in training
+		in_training_phase (bool): if not in training phase, all events (incld. inconclusive ones) will be predicted
+
+	Returns:
+		dict: a dict of X, Y np.array 
+	"""
 	with h5py.File(fn, 'r') as store:
 		X = store['X'][:]
 		Y = store['Y'][:]
@@ -279,6 +325,19 @@ def construct_data_from_h5(fn, covg_filter=20, in_training_phase=False):
 
 
 def construct_training_data_from_label(label_fn, geneExp_fn, seqFeature_df, geneExp_absmax, ID='', in_training_phase=False):
+	"""Read in a feature file from .txt darts-bht label file
+
+	Args:
+		label_fn (str): filepath to label file; could be built by ``Darts_DNN build_feature``
+		geneExp_fn (str): filepath for *un-normalized* gene expression trans features
+		seqFeature_df (pandas.DataFrame): cis features in a pandas.DataFrame, with index being event ID
+		geneExp_absmax (np.array): absolute max values for trans features as a normalizier
+		ID (str): ID for this labelled datasets; used in training
+		in_training_phase (bool): if not in training phase, all events (incld. inconclusive ones) will be predicted
+
+	Returns:
+		dict: a dict of X, Y np.array 
+	"""
 	if not os.path.isfile(label_fn):
 		raise Exception('this file is not found: %s'%label_fn)
 	if not os.path.isfile(geneExp_fn):
@@ -320,6 +379,8 @@ def construct_training_data_from_label(label_fn, geneExp_fn, seqFeature_df, gene
 
 
 def read_sequence_feature(fn=None):
+	"""Read in cis sequence features
+	"""
 	if not os.path.isfile(fn):
 		raise Exception('cis feature file not found: %s'%fn)
 	if fn.endswith('h5') or fn.endswith('hdf5'):
@@ -332,6 +393,8 @@ def read_sequence_feature(fn=None):
 
 
 def read_label_fn(label_fn, significance=0.1, min_read_cov=20, in_training_phase=False):
+	"""Read in event labels from ``Darts_BHT bayes_infer`` output.
+	"""
 	pos = {}
 	neg = {}
 	inconclusive = {}

@@ -1,0 +1,6 @@
+v0.1.0
+-------
+
+- initial release
+- wrapped Rcpp in rpy2
+- wrapped rMATS-turbo v4.0.2 in "rmats_count" submcommand

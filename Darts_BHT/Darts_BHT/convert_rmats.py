@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-'''Utils for connecting rMATS to Darts
+'''Utils for connecting rMATS to Darts.
 '''
 
 import os

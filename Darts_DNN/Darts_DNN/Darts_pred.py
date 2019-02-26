@@ -2,18 +2,8 @@
 
 """
 Darts_DNN - predict
+
 Predict probability of differential splicing between two conditions
-
-
-Below is original file header:
-# testing the dnn model on Control cell lines
-# i.e. HepG2 vs. K562
-# Zijun Zhang
-# 6.16.2017
-# revised 7.1.2017: changed to PTBP1 CRISPR
-# revised 7.2.2017: changed to write prediction for a single dataset
-# revised 8.8.2017: changed to kallisto TPM
-# revised 2.16.2018: changed to python package
 """
 
 import sys

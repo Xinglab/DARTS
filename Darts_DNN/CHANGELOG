@@ -1,0 +1,14 @@
+v0.1.0
+--------
+Feb. 24, 2019
+
+- added A5SS, A3SS, RI to DNN
+- added ``get_data`` utilities for downloading
+- optimized ``predict`` for in-memory feature matrix
+
+v0.0.1
+-------
+March 19, 2018
+
+- initial code for SE
+- initial ``train``, ``predict`` and ``build_feature`` utils

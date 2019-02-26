@@ -1,7 +1,10 @@
-'''use pandas to store Darts_BHT output
-from text to xlsx
-ZZJ
-2.20.2019
+# -*- coding: utf-8 -*-
+
+'''Use pandas to store Darts_BHT output
+from text to xlsx. If `openpyxl` is available, 
+then append new sheets to existing xlsx file, making one "Darts_BHT.results.xlsx"
+with multiple sheets, each sheet for a splicing event type;
+otherwise, the existing xlsx file will be overwrite.
 '''
 
 import os
@@ -61,7 +64,10 @@ def write_xlsx(res_fp, annot_fp, event_type):
 			logger.info('Overwrite Warning: found previous results, but openpyxl not available, will overwrite the file. Use "pip install openpyxl" to avoid this warning.')
 	logger.info('writting xlsx')
 	prior_type = 'flat' if 'flat' in os.path.basename(res_fp) else 'info'
-	writer = pd.ExcelWriter(xlsx_fp, engine='openpyxl')
+	if has_openpyxl:
+		writer = pd.ExcelWriter(xlsx_fp, engine='openpyxl')
+	else:
+		writer = pd.ExcelWriter(xlsx_fp, engine='xlsxwriter')
 	if add_sheet:
 		writer.book = book
 	xlsx_df.to_excel(writer, sheet_name="{}-{}".format(event_type, prior_type))
