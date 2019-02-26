@@ -1,57 +1,59 @@
 #!/usr/bin/env python
-# -*- coding: UTF-8 -*-
 
-'''Deep-learning Augmented RNA-seq analysis of Transcript Splicing
 
-This is the main entry for Darts DNN. 
+"""Deep-learning Augmented RNA-seq analysis of Transcript Splicing
+
+This is the main entry for Darts. 
 
 Example:
-	$ Darts_DNN [train|predict|build_feature|get_data] <options>
+	$ Darts_DNN [train|predict|build_feature] <options>
 
-Author:
+Authors:
 	Zijun Zhang <zj.z[at]ucla.edu>
+	Yi Xing <yxing[at]ucla.edu>
 
 Date:
-	Feb. 13, 2019
-'''
+	Feb. 16, 2018
+"""
+
+__author__ = 'Zijun Zhang'
+__version__ = '0.1.0'
+__email__ = 'zj.z@ucla.edu'
+
 
 import os
 import sys
 import logging
 import argparse as ap
 import datetime
-from Darts_DNN import config
-
-__author__ = 'Zijun Zhang'
-__version__ = config.CURRENT_VERSION
-__email__ = 'zj.z@ucla.edu'
 
 
 def main():
+	"""main entry for Darts
+	This function setup the logging and handle the input options
+	Args
+		None
+	Returns
+		None
+	"""
+	logger = setup_logger()
 	argparser = get_arg_parser()
 	args = argparser.parse_args()
 	
 	subcommand = args.subcommand
 	
 	if subcommand == 'train':
-		logger = setup_logger()
 		from Darts_DNN import Darts_train
 		Darts_train.parser( args )
 		
 	elif subcommand == 'predict':
-		logger = setup_logger()
 		from Darts_DNN import Darts_pred
 		Darts_pred.parser( args )
 	
 	elif subcommand == 'build_feature':
-		logger = setup_logger()
 		from Darts_DNN import Darts_build_feature
+		#print args
 		Darts_build_feature.parser( args )
-
-	elif subcommand == 'get_data':
-		logger = setup_logger()
-		from Darts_DNN import Darts_get_data
-		Darts_get_data.parser( args )
 
 def setup_logger():
 	"""Set up the logger for the whole pipeline
@@ -62,7 +64,7 @@ def setup_logger():
 	"""
 	# setup logger
 	logger = logging.getLogger('Darts_DNN')
-	logger.setLevel(logging.INFO)
+	logger.setLevel(logging.DEBUG)
 	# create file handler which logs even debug messages
 	fh = logging.FileHandler('log.Darts_DNN.txt')
 	fh.setLevel(logging.INFO)
@@ -101,9 +103,6 @@ def get_arg_parser():
 	# build_feature
 	add_build_feature_parser(subparsers)
 	
-	# get data
-	add_get_data_parser(subparsers)
-
 	return argparser
 
 
@@ -111,37 +110,11 @@ def add_train_parser( subparsers ):
 	ag_train = subparsers.add_parser("train", help="Darts_DNN train: train a DNN model using Darts Framework from scratch")
 	
 	# input/output
-	ag_train.add_argument("-i", "--input-filelist", dest="input_filelist", nargs='+', type=str, required=True,
-		help="Filepath for table containing all training data (feature matrix or label files, see online exmamples), maximum from two files; e.g. ENCODE.trainList.txt Roadmap.trainList.txt")
+	ag_train.add_argument("-t", "--train-dir", dest="train_dir", nargs='+', type=str, required=True,
+		help="Folder path for all training data (in .h5 format), maximum from two folder; e.g. train_data/ENCODE train_data/Roadmap")
 	
 	ag_train.add_argument("-o", "--out-dir", dest="out_dir", type=str, required=True,
 		help="Output folder; saved model parameters will be 'best_val_model.h5'")	
-
-	ag_train.add_argument("-t", "--type", dest="event_type", type=str, required=False,
-		default='SE', choices=['SE', 'A5SS', 'A3SS', 'RI'],
-		help="Optional, default SE: specify the alternative splicing event type. SE: skipped exons, A3SS: alternative 3 splice sites, A5SS: alternative 5 splice sites, RI: retained introns")
-	
-	return
-
-
-def add_get_data_parser( subparsers ):
-	ag_get_data = subparsers.add_parser("get_data", help="Darts_DNN get_data: connects online to get Darts_DNN data for the current version.")
-	
-	# input/output
-	ag_get_data.add_argument("-d", "--data", dest="data", nargs='+', type=str, required=True,
-		choices=list(config.CURRENT_AVAILABLE_DATA.keys()),
-		help="Available data for download")
-	
-	ag_get_data.add_argument("-o", "--out-dir", dest="out_dir", type=str, required=False,
-		help="Optional, default user home directory: Output folder for downloaded data")	
-
-	ag_get_data.add_argument("-t", "--type", dest="event_type", type=str, required=False,
-		default='SE', choices=['SE', 'A5SS', 'A3SS', 'RI'],
-		help="Optional, default SE: specify the alternative splicing event type. SE: skipped exons, A3SS: alternative 3 splice sites, A5SS: alternative 5 splice sites, RI: retained introns")
-
-	ag_get_data.add_argument("--specified-version", dest="sp", type=str, required=False, default=config.CURRENT_VERSION,
-		help="Optional, default current version: specified a Darts_DNN version for checking data availability")	
-	
 	return
 
 
@@ -149,17 +122,13 @@ def add_pred_parser( subparsers ):
 	ag_pred = subparsers.add_parser("predict", help="Darts_DNN predict: make predictions on a built feature sets in h5 format")
 	
 	# input/output
-	ag_pred.add_argument("-i", dest="input", type=str, required=True,
-		help="Input feature file (*.h5) or Darts_BHT output (*.txt)")
-	ag_pred.add_argument("-o", dest="output", type=str, required=True,
+	ag_pred.add_argument("-i", "--input", dest="input", type=str, required=True,
+		help="Input feature file (*.h5)")
+	
+	ag_pred.add_argument("-o", "--output", dest="output", type=str, required=True,
 		help="Output filename")
-	ag_pred.add_argument("-t", dest="event_type", type=str, required=False,
-		default='SE', choices=['SE', 'A5SS', 'A3SS', 'RI'],
-		help="Optional, default SE: specify the alternative splicing event type. SE: skipped exons, A3SS: alternative 3 splice sites, A5SS: alternative 5 splice sites, RI: retained introns")
-	ag_pred.add_argument("-e", dest="expr", nargs='+', type=str, required=False,
-		help="Optional, required if input is Darts_BHT output; Folder path for Kallisto expression files; e.g '-e Ctrl_rep1,Ctrl_rep2 KD_rep1,KD_rep2'")
-	ag_pred.add_argument("-m", dest="model", type=str, required=False,
-		help="Optional, default using current version model in user home directory: Filepath for a specific model parameter file")
+	ag_pred.add_argument("-m", "--model", dest="model", type=str, required=False,
+		help="Filepath for a model file; default using internal Darts_DNN trained on ENCODE+Roadmap")
 	return
 
 
@@ -168,7 +137,7 @@ def add_build_feature_parser( subparsers ):
 	
 	# input/output
 	ag_build_feature.add_argument("-i", "--input", dest="input", type=str, required=True,
-		help="A list of alternative splicing events; Darts-flat output")
+		help="A list of exon-skipping events; Darts-flat output")
 	
 	ag_build_feature.add_argument("-c", "--cis-feature", dest="cis", type=str, required=False,
 		help="File path for exon cis features (Normalized); default using downloaded from Github")
@@ -178,10 +147,6 @@ def add_build_feature_parser( subparsers ):
 	
 	ag_build_feature.add_argument("-o", "--output", dest="output", type=str, required=True,
 		help="Output file (*.h5)")
-
-	ag_build_feature.add_argument("-t", "--type", dest="event_type", type=str, required=False,
-		default='SE', choices=['SE', 'A5SS', 'A3SS', 'RI'],
-		help="Optional, default SE: specify the alternative splicing event type. SE: skipped exons, A3SS: alternative 3 splice sites, A5SS: alternative 5 splice sites, RI: retained introns")
 	
 	return
 

@@ -1,0 +1,3 @@
+useDynLib(Darts)
+exportPattern("^[[:alpha:]]+")
+importFrom(Rcpp, evalCpp)
