@@ -1,0 +1,8 @@
+v0.0.1:
+  SE: ~/.darts/sequenceFeature/ENCODE_sequenceFeature_absmax_normalized.h5
+
+v0.1.0:
+  SE: ~/.darts/DNN/v0.1.0/cisFeature/SE.norm.txt.gz
+  A3SS: ~/.darts/DNN/v0.1.0/cisFeature/A3SS.norm.txt.gz
+  A5SS: ~/.darts/DNN/v0.1.0/cisFeature/A5SS.norm.txt.gz
+  RI: ~/.darts/DNN/v0.1.0/cisFeature/RI.norm.txt.gz

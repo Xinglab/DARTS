@@ -1,0 +1,42 @@
+v0.0.1:
+  SE:
+    'n_in'      : 5922
+    'n_out'     : 2
+    'n_hidden'  : [1200, 500, 300, 200]
+    'dropout'   : [0, 0.6, 0.5, 0.3, 0.1]
+    'n_epoches' : 1
+    'batch_size': 400
+    'optimizer' : 'RMSprop'
+v0.1.0:
+  SE:
+    'n_in'      : 5922
+    'n_out'     : 2
+    'n_hidden'  : [1200, 500, 300, 200]
+    'dropout'   : [0, 0.6, 0.5, 0.3, 0.1]
+    'n_epoches' : 1
+    'batch_size': 400
+    'optimizer' : 'RMSprop'
+  A3SS:
+    'n_in'      : 5967
+    'n_out'     : 2
+    'n_hidden'  : [1200, 500, 300, 200]
+    'dropout'   : [0, 0.6, 0.5, 0.3, 0.1]
+    'n_epoches' : 1
+    'batch_size': 500
+    'optimizer' : 'RMSprop'
+  A5SS:
+    'n_in'      : 5969
+    'n_out'     : 2
+    'n_hidden'  : [1200, 500, 300, 200]
+    'dropout'   : [0, 0.6, 0.5, 0.3, 0.1]
+    'n_epoches' : 1
+    'batch_size': 500
+    'optimizer' : 'RMSprop'
+  RI:
+    'n_in'      : 4744
+    'n_out'     : 2
+    'n_hidden'  : [1200, 500, 300, 200]
+    'dropout'   : [0, 0.6, 0.5, 0.3, 0.1]
+    'n_epoches' : 1
+    'batch_size': 500
+    'optimizer' : 'RMSprop'

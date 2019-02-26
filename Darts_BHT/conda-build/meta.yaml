@@ -1,0 +1,33 @@
+package:
+  name: darts_bht
+  version: "0.1.0"
+
+source:
+  path: ..
+
+build:
+  number: 2
+  script: python setup.py install
+
+requirements:
+  build:
+    - python=2.7
+    - rpy2
+    - r-base>=3.4.3
+    - pandas
+  run:
+    - python=2.7
+    - r-base>=3.4.3
+    - pandas
+    - rpy2
+
+
+test:
+  imports:
+    - Darts_BHT.BHT_wrapper
+    - Darts_BHT.rmats_wrapper
+    - Darts_BHT.pretty_writter
+  commands:
+    - Darts_BHT -h
+    - Darts_BHT rmats_count -h
+    - Darts_BHT bayes_infer -h

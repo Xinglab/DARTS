@@ -1,0 +1,9 @@
+v0.0.1:
+  SE: ~/.darts/DNN/v0.0.1/trainedParam/SE-trainedParam-encode_plus_roadmap.h5
+
+
+v0.1.0:
+  SE: ~/.darts/DNN/v0.1.0/trainedParam/SE-trainedParam-EncodeRoadmap.h5
+  A5SS: ~/.darts/DNN/v0.1.0/trainedParam/A5SS-trainedParam-EncodeRoadmap.h5
+  A3SS: ~/.darts/DNN/v0.1.0/trainedParam/A3SS-trainedParam-EncodeRoadmap.h5
+  RI: ~/.darts/DNN/v0.1.0/trainedParam/RI-trainedParam-EncodeRoadmap.h5
