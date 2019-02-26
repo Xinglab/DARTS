@@ -1,0 +1,319 @@
+#!/usr/bin/env python
+
+"""A pipeline for processing GEO/fastq data using 
+Darts splicing analysis toolkit
+Author:
+	Zijun Zhang
+Date:
+	2.12.2018
+"""
+
+import os
+import sys
+import re
+
+###***--- UTILITY FUNCTIONS ---***###
+
+def get_sample_dict(project):
+	sample_dict = {}
+	for sample_name in os.listdir(os.path.join(project, 'data')):
+		subsample = [x for x in
+			os.listdir(os.path.join(project, 'data', sample_name))
+			if x.endswith('sra') ]
+		sample_dict[sample_name] = [re.search(r"(.+)\.sra", x).group(1) for x in subsample]
+	return sample_dict
+
+def concat_star_fq(sample_name):
+	fq1 = []
+	fq2 = []
+	par_dir = os.path.join(PROJECT, 'fq')
+	suffix = '.fastq.gz' if GZIP else '.fastq' 
+	for sample_id in config['sample_dict'][sample_name]:
+		fq1.append( os.path.join(par_dir, sample_name, sample_id+'_1'+suffix) )
+		fq2.append( os.path.join(par_dir, sample_name, sample_id+'_2'+suffix) )
+	if PAIRED_END:
+		s = ','.join(fq1) + ' ' + ','.join(fq2)
+	else:
+		s = ','.join(fq1)
+	#print(s)
+	return s
+
+###***--- IN-FILE CONSTANTS ---***###
+
+PROJECT = os.environ.get("PROJECT")
+
+configfile:
+	os.path.join(PROJECT, "config", "config.yaml")
+
+COMPARISON = list(config['rmats']['comparison'].keys())[0]
+COMPARISON_LIST = list(config['rmats']['comparison'].keys())
+GENOME = 'hg19' if not 'genome' in config else config['genome']
+
+#SAMPLE_DICT = get_sample_dict(PROJECT)
+SAMPLE_DICT = config['sample_dict']
+PAIRED_END = True
+GZIP = True if not 'gzip' in config else config['gzip']
+if GZIP:
+	FQ_PATTERN = [ '{project}/fq/{sample_name}/{sample_id}_1.fastq.gz', '{project}/fq/{sample_name}/{sample_id}_2.fastq.gz'] \
+		if PAIRED_END else \
+		['{project}/fq/{sample_name}/{sample_id}.fastq.gz']
+	FQ_CMD = '--readFilesCommand zcat'
+else:
+	FQ_PATTERN = [ '{project}/fq/{sample_name}/{sample_id}_1.fastq', '{project}/fq/{sample_name}/{sample_id}_2.fastq'] \
+		if PAIRED_END else \
+		['{project}/fq/{sample_name}/{sample_id}.fastq']
+	FQ_CMD = ''
+
+
+
+###***--- SNAKEMAKE RULES ---***###
+
+
+rule all:
+	input:
+		# rmats
+		["{project}/rmats/{comparison}/SE.MATS.JC.txt".format(project=PROJECT, comparison=x) \
+			for x in COMPARISON_LIST ], 
+		# kallisto
+		expand("{project}/kallisto/{sample_name}/abundance.tsv", project=PROJECT, sample_name=SAMPLE_DICT.keys()),
+		# darts_flat
+		#["{project}/darts/{comparison}/darts_flat/Sp_out.txt".format(project=PROJECT, comparison=x) \
+		#	for x in COMPARISON_LIST ],
+		# darts_pred
+		#["{project}/darts/{comparison}/darts_pred/DNN_pred.txt".format(project=PROJECT, comparison=x) \
+		#	for x in COMPARISON_LIST ],
+		# darts_info
+		#["{project}/darts/{comparison}/darts_info/Sp_out.prior.txt".format(project=PROJECT, comparison=x) \
+		#	for x in COMPARISON_LIST ],
+		# bigwig
+		["{project}/bigwig/{sample_name}/{sample_name}.bw".format(project=PROJECT, sample_name=x) \
+			for x in SAMPLE_DICT.keys() ]
+
+rule all_debug:
+	input:
+		# rmats
+		"{project}/rmats/{comparison}/SE.MATS.JC.txt".format(project=PROJECT, comparison=COMPARISON),
+		# kallisto
+		expand("{project}/kallisto/{sample_name}/abundance.tsv", project=PROJECT, sample_name=SAMPLE_DICT.keys()),
+		# darts_flat
+		"{project}/darts/{comparison}/darts_flat/Sp_out.txt".format(project=PROJECT, comparison=COMPARISON),
+		# darts_pred
+		#"{project}/darts/{comparison}/darts_pred/DNN_pred.txt".format(project=PROJECT, comparison=COMPARISON)
+
+rule all_mapping:
+	input:
+		expand("{project}/fq/{sample_name}/foo.txt", project=PROJECT, sample_name=SAMPLE_DICT.keys() )
+
+rule all_rmats:
+	input:
+		["{project}/rmats/{comparison}/JC.raw.input.SE.txt".format(project=PROJECT, comparison=x) for x in 
+			config['rmats']['comparison'].keys() ]
+
+rule all_darts:
+	input:
+		["{project}/darts/{comparison}/darts_pred/DNN_pred.txt".format(project=PROJECT, comparison=x) for x in 
+			config['rmats']['comparison'].keys() ]
+
+rule dump_sra:
+	input:
+		lambda wildcards: expand(
+			"{project}/data/{sample_name}/{sample_id}.sra", 
+			project=PROJECT,
+			sample_name=wildcards.sample_name,
+			sample_id=SAMPLE_DICT[wildcards.sample_name])
+	output:
+		FQ_PATTERN
+	params:
+		outdir="{project}/fq/{sample_name}"
+	shell:
+		"fastq-dump {input} -O {params.outdir} --gzip --split-3"
+
+rule star_map:
+	input:
+		sample=lambda wildcards: 
+			expand(FQ_PATTERN, 
+				project=PROJECT, 
+				sample_name=wildcards.sample_name, 
+				sample_id=SAMPLE_DICT[wildcards.sample_name])
+	output:
+		"{project}/star/{sample_name}/Aligned.sortedByCoord.out.bam"
+	params:
+		fq_input = lambda wildcards: concat_star_fq(wildcards.sample_name),
+		prefix = "{project}/star/{sample_name}/",
+		index = config['genome_index'][GENOME]['star_idx'],
+		extra = FQ_CMD + \
+			' --alignEndsType EndToEnd'
+	threads: 4
+	shell:
+		"""
+		STAR --genomeDir {params.index} \
+		--readFilesIn {params.fq_input}  --outSAMtype BAM SortedByCoordinate \
+		--outFileNamePrefix {params.prefix} \
+		--runThreadN {threads} \
+		{params.extra}
+		"""
+
+rule make_bw:
+	input:
+		"{project}/star/{sample_name}/Aligned.sortedByCoord.out.bam"
+	output:
+		"{project}/bigwig/{sample_name}/{sample_name}.bw"
+	params:
+		bw_script="scripts/make_bw/bamToBigWig",
+		genome_index=GENOME,
+		tmp_dir="{project}/bigwig/{sample_name}/tmp"
+	shell:
+		"""
+		mkdir -p {params.tmp_dir}
+		{params.bw_script} {input} {params.tmp_dir} {output} {params.genome_index} 
+		"""
+			
+
+rule kallisto_quant:
+	input:
+		sample=lambda wildcards: 
+			expand(FQ_PATTERN, 
+				project=PROJECT, 
+				sample_name=wildcards.sample_name, 
+				sample_id=SAMPLE_DICT[wildcards.sample_name])
+	output:
+		"{project}/kallisto/{sample_name}/abundance.tsv"
+	params:
+		outdir = "{project}/kallisto/{sample_name}/",
+		index = config['genome_index'][GENOME]['kallisto_idx']
+	shell:
+		"""
+		kallisto quant -i {params.index} -o {params.outdir} {input.sample}
+		"""
+
+rule cleanup_fq:
+	input:
+		"{project}/kallisto/{sample_name}/abundance.tsv",
+		"{project}/star/{sample_name}/Aligned.sortedByCoord.out.bam"
+	output:
+		"{project}/fq/{sample_name}/foo.txt"
+	shell:
+		"""
+		#rm {wildcards.project}/fq/{wildcards.sample_name}/*
+		echo 'cleaned up @ '`date` > {wildcards.project}/fq/{wildcards.sample_name}/foo.txt
+		sleep 300
+		"""
+
+rule rmats_turbo:
+	input:
+		sample_1_bam = lambda wildcards: expand("{project}/star/{sample_name}/Aligned.sortedByCoord.out.bam",
+			project=wildcards.project,
+			sample_name=config['rmats']['comparison'][wildcards.comparison]['group1']),
+		sample_2_bam = lambda wildcards: expand("{project}/star/{sample_name}/Aligned.sortedByCoord.out.bam", \
+			project=wildcards.project,
+			sample_name=config['rmats']['comparison'][wildcards.comparison]['group2'])
+	output:
+		"{project}/rmats/{comparison}/SE.MATS.JC.txt"
+	threads: 4
+	params:
+		rmats = '/u/nobackup/yxing/NOBACKUP/frankwoe/programs/rmats-turbo/rMATS-turbo-UCS4/rmats.py',
+		outdir = '{project}/rmats/{comparison}',
+		gtf = config['genome_index'][GENOME]['gtf'],
+		readlen = config['rmats']['readLength']
+	shell:
+		"""
+		python2 scripts/rmats/make_config_txt.py {input.sample_1_bam} > {params.outdir}/b1.txt
+		python2 scripts/rmats/make_config_txt.py {input.sample_2_bam} > {params.outdir}/b2.txt
+		echo "python2 {params.rmats} --gtf {params.gtf} --b1 {params.outdir}/b1.txt --b2 {params.outdir}/b2.txt --od {params.outdir} --readLength {params.readlen} --nthread {threads}"
+		python2 {params.rmats} --gtf {params.gtf} --b1 {params.outdir}/b1.txt --b2 {params.outdir}/b2.txt \
+		--od {params.outdir} --readLength {params.readlen} --nthread {threads}
+		"""
+
+rule darts_flat:
+	input:
+		"{project}/rmats/{comparison}/SE.MATS.JC.txt"
+	output:
+		"{project}/darts/{comparison}/darts_flat/Sp_out.txt"
+	params:
+		darts_r='/u/nobackup/yxing/NOBACKUP/frankwoe/src/Darts_R_package/Darts_pipeline.R',
+		rename_script='scripts/rmats/rename.py',
+		renamed_input="{project}/darts/{comparison}/darts_flat/input.txt",
+		outdir='{project}/darts/{comparison}/darts_flat/',
+		extra= lambda wildcards: '' if len(config['rmats']['comparison'][wildcards.comparison]['group1'])==1 else '-k 1 -m'
+		#extra= lambda wildcards: '' if len(config['rmats']['comparison'][wildcards.comparison]['group1'])==1 else '-k 1'
+	shell:
+		"""
+		python2 {params.rename_script} {input} >{params.renamed_input}
+		Rscript {params.darts_r} -i {params.renamed_input} -o {params.outdir} -v 2 {params.extra}
+		"""
+
+
+rule darts_pred:
+	input:
+		darts_flat="{project}/darts/{comparison}/darts_flat/Sp_out.txt",
+		kallisto_1=lambda wildcards: [ "{project}/kallisto/{sample}/abundance.tsv".format(project=PROJECT, sample=x)
+			for x in config['rmats']['comparison'][wildcards.comparison]['group1'] ],
+		kallisto_2=lambda wildcards: [ "{project}/kallisto/{sample}/abundance.tsv".format(project=PROJECT, sample=x)
+			for x in config['rmats']['comparison'][wildcards.comparison]['group2'] ],
+	output:
+		"{project}/darts/{comparison}/darts_pred/DNN_pred.txt"
+	params:
+		kallisto_1=lambda wildcards: [ "{project}/kallisto/{sample}/".format(project=PROJECT, sample=x)
+			for x in config['rmats']['comparison'][wildcards.comparison]['group1'] ],
+		kallisto_2=lambda wildcards: [ "{project}/kallisto/{sample}/".format(project=PROJECT, sample=x)
+			for x in config['rmats']['comparison'][wildcards.comparison]['group2'] ],
+		outdir="{project}/darts/{comparison}/darts_pred/",
+		spdir="{project}/darts/{comparison}/darts_flat/",
+		data_fn="{project}/darts/{comparison}/darts_pred/data.h5"
+	run:
+		from scripts.darts.darts_pred import Darts_rbpTable as _Darts_rbp
+		from scripts.darts.darts_pred import darts_kallisto2rsem as _Darts_kallisto2rsem
+		from scripts.darts.darts_pred import Darts_single_featureTable as _Darts_featureTable
+		kallisto_1 = params.kallisto_1
+		kallisto_2 = params.kallisto_2
+		for kal_dir in kallisto_1 + kallisto_2:
+			#kal_dir = os.path.dirname(kal)
+			_Darts_kallisto2rsem.parser(kal_dir)
+		
+		_Darts_rbp.parser(params.outdir, wildcards.comparison, 
+			[x+'gene_tpm.tsv' for x in kallisto_1],
+			[x+'gene_tpm.tsv' for x in kallisto_2])
+		
+		rbp_dir = params.outdir
+		## !! DEBUG; comment out before actual run
+		#spdir='test_snakemake/darts/test/darts_flat/'; rbp_dir='test_snakemake/darts/test/darts_pred/'; outdir=rbp_dir
+		#_Darts_featureTable.parser(spdir, rbp_dir, outdir)
+		_Darts_featureTable.parser(params.spdir, rbp_dir, params.outdir)
+		
+		## !! DEBUG; comment out before actual run
+		#data_fn=os.path.join(outdir, 'data.h5')
+		#cmd = 'python2 scripts/darts/darts_pred/Darts_pred.py %s'%data_fn
+		#os.system(cmd)
+		
+		# Roadmap
+		cmd = 'python2 scripts/darts/darts_pred/Darts_pred.py %s roadmap_only > %s'%(params.data_fn, params.outdir+'/roadmap_only.acc.txt')
+		print(cmd)
+		os.system(cmd)
+		# ENCODE
+		cmd = 'python2 scripts/darts/darts_pred/Darts_pred.py %s encode_only > %s'%(params.data_fn, params.outdir+'/encode_only.acc.txt')
+		print(cmd)
+		os.system(cmd)
+		# ENCODE_plus_Roadmap
+		cmd = 'python2 scripts/darts/darts_pred/Darts_pred.py %s > %s'%(params.data_fn, params.outdir+'/acc.txt')
+		print(cmd)
+		os.system(cmd)
+
+
+rule darts_info:
+	input:
+		count="{project}/rmats/{comparison}/SE.MATS.JC.txt",
+		prior="{project}/darts/{comparison}/darts_pred/DNN_pred.txt"
+	output:
+		"{project}/darts/{comparison}/darts_info/Sp_out.prior.txt"
+	params:
+		darts_r='/u/nobackup/yxing/NOBACKUP/frankwoe/src/Darts_R_package/Darts_pipeline.R',
+		rename_script='scripts/rmats/rename.py',
+		renamed_input="{project}/darts/{comparison}/darts_flat/input.txt",
+		outdir='{project}/darts/{comparison}/darts_info/',
+		extra= lambda wildcards: '' if len(config['rmats']['comparison'][wildcards.comparison]['group1'])==1 else '-k 1 -m'
+		#extra= lambda wildcards: '' if len(config['rmats']['comparison'][wildcards.comparison]['group1'])==1 else '-k 1'
+	shell:
+		"""
+		python2 {params.rename_script} {input.count} >{params.renamed_input}
+		Rscript {params.darts_r} -i {params.renamed_input} -o {params.outdir} -r {input.prior} -v 2 {params.extra}
+		"""

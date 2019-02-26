@@ -27,7 +27,7 @@ def add_rmats_parser( subparsers ):
 
     parser.add_argument('--version', action='version',
                         help='Version.', version=VERSION)
-    parser.add_argument('--gtf', action='store',
+    parser.add_argument('--gtf', action='store', required=True,
                         help='An annotation of genes and transcripts in GTF format.', dest='gtf')
 
     group1.add_argument('--b1', action='store', default='',
@@ -85,13 +85,15 @@ def process_parsed_rmats_args( args ):
             with open(args.b1, 'r') as fp:
                 args.b1 = fp.read().strip(' ,\n')
         else:
-            args.b1 = ','.join(args.b1)
+            tmp = args.b1.split(',')
+            assert all( (x.endswith('.bam') for x in tmp) ), Exception('--b1 must be either a .txt configuration file, or a list of comma-separated .bam alignment files')
     if len(args.b2) > 0:
         if args.b2.endswith('.txt'):
             with open(args.b2, 'r') as fp:
                 args.b2 = fp.read().strip(' ,\n')
         else:
-            args.b2 = ','.join(args.b2)
+            tmp = args.b2.split(',')
+            assert all( (x.endswith('.bam') for x in tmp) ), Exception('--b2 must be either a .txt configuration file, or a list of comma-separated .bam alignment files')
     if len(args.s1) > 0:
         with open(args.s1, 'r') as fp:
             args.s1 = fp.read().strip(' ,\n')

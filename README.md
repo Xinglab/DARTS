@@ -1,6 +1,6 @@
 # DARTS
 ### Deep-learning Augmented RNA-seq analysis of Transcript Splicing
-### Date: "2.15.2018"
+### Date: "2.25.2019"
 
 ### Table of Contents
 - [Installation](#installation)
@@ -9,18 +9,18 @@
 - [Copyright and License Information](#copyright-and-license-information)
 
 ### Installation
-Currently the `Darts` software is installed by three individual
-component: `Darts_BHT`, `Darts_DNN`, and `Darts_Snakemake_pipeline`.
-Each component has its installation guides. Click the links below:
-  - [Darts BHT](Darts_BHT/)
-  - [Darts DNN](Darts_DNN/)
-  - [Darts Snakemake pipeline](Darts_Snakemake_pipeline/)
+The installation is made easy through [Anaconda](https://anaconda.org/darts-comp-bio).
 
-In the future we will provide a unified `Makefile`.
+```bash
+conda create -n darts python=2.7  # optional
+conda activate darts              # optional
+conda install -c darts-comp-bio darts_bht
+conda install -c darts-comp-bio darts_dnn
+```
 
 ### Usage
-See each component for how to use. We recommend using [Darts_Snakemake_pipeline](Darts_Snakemake_pipeline/)
-directly for the practitioners.
+See each component for how to use. 
+
 
 ### Contact
 Zijun Zhang <zj.z@ucla.edu>
@@ -28,7 +28,7 @@ Zijun Zhang <zj.z@ucla.edu>
 Yi Xing <yxing@ucla.edu>
 
 ### Copyright and License Information
-Copyright (C) 2018 University of California, Los Angeles (UCLA) Zijun Zhang and Yi Xing
+Copyright (C) 2018-2019 University of California, Los Angeles (UCLA) Zijun Zhang and Yi Xing
 
 Authors: Zijun Zhang and Yi Xing
 
