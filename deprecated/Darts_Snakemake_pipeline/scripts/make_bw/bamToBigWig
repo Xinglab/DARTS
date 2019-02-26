@@ -1,0 +1,13 @@
+input=$1
+tmp_dir=$2
+output=$3
+genome=$4
+
+echo "input:$1"
+echo "tmp_dir:$2"
+echo "output:$3"
+echo "genome:$4"
+
+bedtools genomecov -bg -ibam $input -split | LC_COLLATE=C sort -k1,1 -k2,2n > $2/tmp.sorted.bedgraph
+bedGraphToBigWig $2/tmp.sorted.bedgraph /u/home/f/frankwoe/nobackup/programs/UCSC/$4.chrom.sizes $3
+rm -rf $2/tmp*.bedgraph

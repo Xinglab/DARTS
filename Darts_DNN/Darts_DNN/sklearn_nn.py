@@ -1,6 +1,10 @@
+"""
 # sklearn-style neural net in keras
+
 # Zijun Zhang, 3/9/2017
+
 # revised 6.6.2017: add batch normalization options
+"""
 
 from keras.utils import np_utils
 from keras.models import Sequential, Model
@@ -8,7 +12,6 @@ from keras.layers import Dense, Dropout, Activation, Input
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import RMSprop, SGD
 from keras.constraints import maxnorm
-import theano.tensor as T
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.callbacks import Callback
 
@@ -17,7 +20,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 #from sklearn.utils.multiclass import unique_labels
 #from sklearn.metrics import euclidean_distances
-from Darts_DNN.spider_utils import *
+from .utils import *
 
 class KerasNeuralNetClassifier(BaseEstimator, ClassifierMixin):
 	"""

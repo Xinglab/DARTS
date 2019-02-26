@@ -1,0 +1,11 @@
+v0.0.1: 
+  SE: ~/.darts/DNN/v0.0.1/transFeature/rbp_max.tsv
+  A3SS: ~/.darts/DNN/v0.0.1/transFeature/rbp_max.tsv
+  A5SS: ~/.darts/DNN/v0.0.1/transFeature/rbp_max.tsv
+  RI: ~/.darts/DNN/v0.0.1/transFeature/rbp_max.tsv
+
+v0.1.0: 
+  SE: ~/.darts/DNN/v0.1.0/transFeature/rbp_max.tsv
+  A3SS: ~/.darts/DNN/v0.1.0/transFeature/rbp_max.tsv
+  A5SS: ~/.darts/DNN/v0.1.0/transFeature/rbp_max.tsv
+  RI: ~/.darts/DNN/v0.1.0/transFeature/rbp_max.tsv
