@@ -14,13 +14,13 @@ The installation is made easy through [Anaconda](https://anaconda.org/darts-comp
 ```bash
 conda create -n darts python=2.7  # optional
 conda activate darts              # optional
-conda install -c darts-comp-bio darts_bht
-conda install -c darts-comp-bio darts_dnn
+conda install -c darts-comp-bio darts_dnn darts_bht
 ```
 
 ### Usage
 See each component for how to use. 
-
+- [Darts_BHT](Darts_BHT/README.md): The Bayesian Hypothesis Testing module.
+- [Darts_DNN](Darts_DNN/README.md): The Deep Neural Network module.
 
 ### Contact
 Zijun Zhang <zj.z@ucla.edu>
