@@ -1,5 +1,6 @@
 # README
 
+[![Documentation Status](https://readthedocs.org/projects/darts-bht/badge/?version=latest)](https://darts-bht.readthedocs.io/en/latest/?badge=latest)
 [![Anaconda-Server Badge](https://anaconda.org/darts-comp-bio/darts_bht/badges/version.svg)](https://anaconda.org/darts-comp-bio/darts_bht)
 [![Anaconda-Server Badge](https://anaconda.org/darts-comp-bio/darts_bht/badges/installer/conda.svg)](https://conda.anaconda.org/darts-comp-bio)
 [![Anaconda-Server Badge](https://anaconda.org/darts-comp-bio/darts_bht/badges/latest_release_date.svg)](https://anaconda.org/darts-comp-bio/darts_bht)
