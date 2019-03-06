@@ -1,5 +1,6 @@
 # README
 
+[![Documentation Status](https://readthedocs.org/projects/darts-dnn/badge/?version=latest)](https://darts-dnn.readthedocs.io/en/latest/?badge=latest)
 [![Anaconda-Server Badge](https://anaconda.org/darts-comp-bio/darts_dnn/badges/version.svg)](https://anaconda.org/darts-comp-bio/darts_dnn)
 [![Anaconda-Server Badge](https://anaconda.org/darts-comp-bio/darts_dnn/badges/installer/conda.svg)](https://conda.anaconda.org/darts-comp-bio)
 [![Anaconda-Server Badge](https://anaconda.org/darts-comp-bio/darts_dnn/badges/latest_release_date.svg)](https://anaconda.org/darts-comp-bio/darts_dnn)
