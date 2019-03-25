@@ -54,7 +54,7 @@ If finished successfully, you will see the following message
 ### Testing
 
 #### Testing the Python wrapper
-You can download the [testing_data](https://github.com/zj-zhang/DARTS-BleedingEdge/tree/doc/Darts_BHT/test_data) from the Github repo. If you installed through Anaconda, then type the following command and should
+You can download the [testing_data](https://github.com/Xinglab/DARTS/tree/master/Darts_BHT/test_data) from the Github repo. If you installed through Anaconda, then type the following command and should
 see the corresponding help message as below:
 
 ```bash
