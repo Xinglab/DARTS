@@ -23,6 +23,10 @@ See each component for how to use.
 - [Darts_DNN](Darts_DNN/README.md): The Deep Neural Network module.
 
 ### Contact
+[Mailing List](mailto:darts-user-group@googlegroups.com) / [Group](https://groups.google.com/d/forum/darts-user-group)
+
+[GitHub Issues](https://github.com/Xinglab/DARTS/issues)
+
 Zijun Zhang <zj.z@ucla.edu>
 
 Yi Xing <yxing@ucla.edu>
