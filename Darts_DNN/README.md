@@ -88,7 +88,7 @@ The "A5SS.thymus_adipose.tgz" is the Roadmap thymus-adipose tissue-specific Alte
 
 ### Using Darts DNN
 
-For more details, please refer to the documentation site at ReadTheDocs [here](#). Below we provide a 
+For more details, please refer to the documentation site at ReadTheDocs [here](https://darts-dnn.readthedocs.io/en/latest/). Below we provide a 
 minimal example.
 
 Assume you have already run `Darts_BHT` and get the Darts-flat inference output file, say `"darts_bht.flat.txt"`. 
