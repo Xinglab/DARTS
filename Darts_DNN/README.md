@@ -91,28 +91,27 @@ The "A5SS.thymus_adipose.tgz" is the Roadmap thymus-adipose tissue-specific Alte
 For more details, please refer to the documentation site at ReadTheDocs [here](https://darts-dnn.readthedocs.io/en/latest/). Below we provide a 
 minimal example.
 
-Assume you have already run `Darts_BHT` and get the Darts-flat inference output file, say `"darts_bht.flat.txt"`. 
-There are two simple steps to run `Darts_DNN` prediction on it:
+In the simplest case, the predict function can be invoked by providing a labelled input file (generated from Darts_BHT bayes_infer) and a trans gene expression file.
 
-#### Darts_DNN build_feature
-You will need to build the feature file for your target Darts-flat output. The input is `"darts_flat.out.txt"`, and the
-output is a feature set in hdf5 data store. Below is an example:
+If you have not installed the Darts_DNN previously, you will need to download the cis-Features and trained model parameters, etc. through Darts_DNN get_data. get_data function will automatically resume previous run and check md5sum - so don't worry about doubled storage space.
 
-```sh
-Darts_DNN build_feature -i darts_flat.out.txt \
--c /path/to/ENCODE_sequenceFeature_absmax_normalized.h5 \
--e /path/to/condition1/kallisto/ /path/to/condition2/kallisto/ \
--o data.h5
+For the purpose of this walk-through tutorial, since our test data is A5SS, we only need to download the files for A5SS splicing events.
+
+```shell script
+Darts_DNN get_data -d transFeature cisFeature trainedParam -t A5SS
 ```
 
-#### Darts_DNN predict
-Now run the `predict`. This will also estimate the prediction accuracy by
-the significant Darts-flat events, so that the users can decide whether to
-proceed running `Darts_BHT` with the informative prior.
-
-
-```sh
-Darts_DNN predict -i data.h5 -o pred.txt \
--m /path/to/model_param.h5
+Next as an example, download the test_data from GitHub then run:
+```shell script
+wget https://github.com/zj-zhang/DARTS-BleedingEdge/raw/master/Darts_DNN/test_data/A5SS.thymus_adipose.tgz
+tar -xvzf A5SS.thymus_adipose.tgz
+Darts_DNN predict -i darts_bht.flat.txt -e RBP_tpm.txt -o pred.txt -t A5SS
 ```
 
+In the screen log output, you should see something like:
+```shell script
+2019-02-25 15:02:32,659 - Darts_DNN.predict - INFO -
+ AUROC=0.8686118716025868
+2019-02-25 15:02:32,659 - Darts_DNN.predict - INFO -
+ AUPR=0.5410178835754661
+```
