@@ -241,7 +241,7 @@ myLaplace = function(log_func, gr_func, init_value, data, method='Nelder-Mead', 
 			lower=c(0.001, -0.999, rep(0.001,length(init_value)-2)),
 			upper=c(0.999, 0.999, rep(0.999,length(init_value)-2))
 			), silent=T)
-		if(class(res)=="try-error" || sum( abs(res$par - init_value ))<0.001 ) {
+		if(inherits(res, "try-error") || sum( abs(res$par - init_value ))<0.001 ) {
 			method='Nel'
 		} else {
 			res$hessian = estim_hess(res$par, gr_func,data, ...)
@@ -267,7 +267,7 @@ myLaplace = function(log_func, gr_func, init_value, data, method='Nelder-Mead', 
 	hess[which(is.na(hess),arr.ind=T)]=0
 	if(n_par>1)	lap_sigma = try(solve(-hess), silent=T)
 	if(n_par==1) lap_sigma = -1/res$hessian
-	if(class(lap_sigma)=="try-error")
+	if(inherits(lap_sigma, "try-error"))
 	{
 		return(list(MAP=theta_hat, hess=hess, integral=NA))
 		#sigma = ginv(-hess)
